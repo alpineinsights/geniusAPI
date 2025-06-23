@@ -1,16 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import os
-import asyncio
-import aiohttp
 import time
-import logging
 import json
 from dotenv import load_dotenv
-from typing import Dict, List, Optional, Any, Tuple
-from supabase_client import get_quartrid_by_name
 from logger import logger
-from urllib.parse import urlparse
 
 # Import the core logic function from app.py
 from app import run_analysis 
@@ -33,11 +26,7 @@ class QueryRequest(BaseModel):
     pdfUrl: str
     companyName: str
 
-# Response model
-class QueryResponse(BaseModel):
-    answer: str
-    processing_time: float
-    # sources: Optional[Dict[str, List[Dict[str, str]]]] = None # Commented out for now
+# Response model is handled dynamically by the run_analysis function
 
 # Main endpoint for financial insights
 @app.post("/api/insights")
