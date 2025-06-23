@@ -1078,10 +1078,9 @@ User's Original Query (for context if needed, but prioritize the objective above
         logger.info(f"--- EXITING async query_gemini function (Finally Block Complete) ---")
 
 # --- Main execution logic --- 
-async def run_analysis(company_name: str, query: str, conversation_context: List = None):
-    """Runs the full analysis pipeline (now async)"""
-    logger.info(f"--- ENTERING run_analysis for {company_name} ---")
-    if conversation_context is None: conversation_context = []
+async def run_analysis(company_name: str, pdf_url: str):
+    """Runs the financial analysis pipeline for uploaded PDF accounts"""
+    logger.info(f"--- ENTERING run_analysis for {company_name} with PDF: {pdf_url} ---")
 
     gemini_client = initialize_gemini()
     claude_client = initialize_claude() # Initialize Claude
@@ -1096,7 +1095,7 @@ async def run_analysis(company_name: str, query: str, conversation_context: List
         logger.critical("Failed to initialize Gemini client. Cannot proceed.")
         return "Error: Failed to initialize AI clients."
 
-    logger.info(f"Starting async analysis for Company: '{company_name}', Query: '{query}'")
+    logger.info(f"Starting financial analysis for Company: '{company_name}', PDF URL: '{pdf_url}'")
 
     quartr_id = get_quartrid_by_name(company_name)
     if not quartr_id: 

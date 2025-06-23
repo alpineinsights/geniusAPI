@@ -30,9 +30,8 @@ app = FastAPI(
 
 # Input model
 class QueryRequest(BaseModel):
-    company_name: str
-    query: str
-    conversation_context: Optional[List[Dict[str, str]]] = None
+    pdfUrl: str
+    companyName: str
 
 # Response model
 class QueryResponse(BaseModel):
@@ -44,15 +43,14 @@ class QueryResponse(BaseModel):
 @app.post("/api/insights")
 async def get_financial_insights(request: QueryRequest):
     start_time = time.time()
-    logger.info(f"Received request for company: {request.company_name}, query: {request.query}")
+    logger.info(f"Received request for company: {request.companyName}, pdfUrl: {request.pdfUrl}")
     
     try:
         # Call the consolidated run_analysis function from app.py
-        # Note: run_analysis handles company ID lookup, document processing, LLM calls, etc.
+        # Note: run_analysis now handles uploaded PDF analysis instead of document processing
         analysis_result = await run_analysis(
-            company_name=request.company_name,
-            query=request.query,
-            conversation_context=request.conversation_context
+            company_name=request.companyName,
+            pdf_url=request.pdfUrl
         )
 
         # Calculate processing time
