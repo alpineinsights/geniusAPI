@@ -1,46 +1,48 @@
-# Financial Analysis API
+# Financial Analysis API - Tenant Solvency Evaluation
 
-A FastAPI application that enables financial professionals to analyze uploaded financial accounts (PDF documents) using a dual-LLM pipeline. The app processes PDFs from provided URLs and generates financial ratio analysis in French using Gemini and Claude AI models.
+A FastAPI application that enables financial professionals to evaluate tenant solvency for commercial rental properties. The app processes financial accounts (PDF documents) using a comprehensive dual-LLM pipeline to calculate 40+ financial ratios and provide detailed tenant risk assessment in French.
 
 ## Features
 
-- Accept JSON payloads with PDF URL and company name
-- Download and process PDF financial documents directly from URLs
-- Dual-LLM analysis pipeline:
-  1. **Gemini 2.5 Flash**: Calculates specific financial ratios and provides quick profitability/solvency analysis
-  2. **Claude 3.5 Sonnet**: Creates executive summary in French and formats financial ratios as JSON
-- French language output optimized for French financial analysis
-- Structured JSON response format
-- Modular architecture for easy maintenance and testing
-- CORS support for frontend integration
-- Clean ASCII logging for French content
-- Asynchronous processing for optimal performance
+- **Comprehensive Financial Ratio Analysis**: 40+ ratios across 6 major categories
+- **Tenant Solvency Evaluation**: Specialized analysis for commercial rental decisions
+- **PDF Processing**: Direct download and analysis of financial documents from URLs
+- **Dual-LLM Pipeline**:
+  1. **Gemini 2.5 Flash**: Calculates comprehensive financial ratios from balance sheets and income statements
+  2. **Claude Sonnet 4**: Performs detailed tenant solvency analysis with risk assessment
+- **Structured Output**: JSON key figures + 800-word detailed French analysis
+- **Risk Assessment**: Clear recommendations (favorable/reserved/unfavorable)
+- **French Language**: Optimized for French financial analysis and tenant evaluation
+- **Modular Architecture**: Easy maintenance and testing
+- **CORS Support**: Frontend integration ready
+- **Asynchronous Processing**: Optimal performance with thinking budget allocation
 
 ## Architecture
 
-The application uses a modular, streamlined architecture:
+The application uses a comprehensive, modular architecture designed for professional tenant solvency evaluation:
 
 - **FastAPI Backend**: RESTful API interface with CORS support
-- **PDF Processing**: Direct download and processing of PDF documents from URLs
-- **Dual-LLM Pipeline**:
-  - **Gemini 2.5 Flash**: Analyzes PDFs to calculate financial ratios (marge d'exploitation, levier financier)
-  - **Claude 3.5 Sonnet**: Synthesizes analysis into French executive summary with structured JSON output
-- **Modular Design**: Separated into focused modules for maintainability
-- **Asynchronous Processing**: Parallel processing for optimal performance
+- **PDF Processing**: Direct download and processing of financial documents from URLs
+- **Comprehensive Analysis Pipeline**:
+  - **Gemini 2.5 Flash**: Extracts and calculates 40+ financial ratios from balance sheets and income statements
+  - **Claude Sonnet 4**: Performs detailed tenant solvency analysis with structured risk assessment
+- **Financial Ratio Categories**: 6 major categories covering all aspects of financial health
+- **Structured Output**: JSON key figures + comprehensive 800-word analysis
+- **Risk Evaluation**: Professional tenant risk assessment with clear recommendations
 
 ### Module Responsibilities
 
-- **`clients.py`**: Initializes and manages AI client connections
-- **`pdf_handler.py`**: Handles PDF download from URLs
-- **`gemini_service.py`**: Processes PDFs with Gemini for financial analysis
-- **`claude_service.py`**: Synthesizes Gemini output into structured JSON
-- **`app.py`**: Orchestrates the complete analysis pipeline
+- **`clients.py`**: Initializes and manages AI client connections (Gemini & Claude)
+- **`pdf_handler.py`**: Handles PDF download and processing from URLs
+- **`gemini_service.py`**: Comprehensive financial ratio calculation (40+ ratios)
+- **`claude_service.py`**: Tenant solvency evaluation with risk assessment
+- **`app.py`**: Orchestrates the complete tenant evaluation pipeline
 
 ## API Endpoints
 
 ### POST /api/insights
 
-Accepts a JSON payload with PDF URL and company name, returns financial analysis in French.
+Accepts a JSON payload with PDF URL and company name, returns comprehensive tenant solvency evaluation in French.
 
 **Request:**
 
@@ -53,31 +55,34 @@ Accepts a JSON payload with PDF URL and company name, returns financial analysis
 
 **Response:**
 
+The response contains two main parts:
+
+1. **JSON Key Figures:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "executiveSummary": "Executive summary in French...",
-    "financialRatios": [
-      {
-        "category": "Profitability",
-        "ratios": [
-          {"name": "Marge d'exploitation N", "value": "15.2%", "period": "2023"},
-          {"name": "Marge d'exploitation N-1", "value": "12.8%", "period": "2022"}
-        ]
-      },
-      {
-        "category": "Leverage", 
-        "ratios": [
-          {"name": "Levier financier N", "value": "0.45", "period": "2023"},
-          {"name": "Levier financier N-1", "value": "0.52", "period": "2022"}
-        ]
-      }
-    ]
-  },
-  "processing_time": 8.45
+  "chiffre_affaires_n": "152 450 K€",
+  "chiffre_affaires_n_moins_1": "147 280 K€",
+  "resultat_exploitation_n": "8 450 K€",
+  "resultat_exploitation_n_moins_1": "12 680 K€",
+  "marge_exploitation_n": "5.54%",
+  "marge_exploitation_n_moins_1": "8.61%",
+  "resultat_net_n": "1 274 K€",
+  "resultat_net_n_moins_1": "18 906 K€",
+  "capitaux_propres_n": "85 420 K€",
+  "capitaux_propres_n_moins_1": "102 650 K€",
+  "dette_financiere_n": "38 450 K€",
+  "dette_financiere_n_moins_1": "35 200 K€"
 }
 ```
+
+2. **Comprehensive 800-word Analysis** covering:
+   - Financial indicators evolution
+   - Financial structure assessment
+   - Profitability analysis
+   - Cash flow and financing capacity
+   - Operational analysis
+   - Working capital cycle
+   - **Risk assessment conclusion** with clear recommendation
 
 ### GET /health
 
@@ -125,27 +130,65 @@ GEMINI_API_KEY=your_gemini_api_key
 
 ## Financial Ratios Calculated
 
-The application specifically calculates:
+The application calculates **40+ comprehensive financial ratios** across 6 major categories:
 
-1. **Marge d'exploitation** (Operating Margin):
-   - Formula: Résultat d'exploitation / Chiffre d'affaires
-   - Calculated for current year (N) and previous year (N-1)
+### 1. **Structure Financière** (13 ratios)
+- Ressources propres, Ressources stables
+- Capital d'exploitation, Surface financière
+- FRNG, BFR, Trésorerie nette
+- Indépendance financière, Couverture immobilisations
 
-2. **Levier financier** (Financial Leverage):
-   - Formula: Dettes financières / Fonds propres
-   - Calculated for current year (N) and previous year (N-1)
+### 2. **Activité d'Exploitation** (12 ratios)
+- Marge globale, Valeur ajoutée, EBE, CAF
+- Charges personnel/VA, Impôts/VA, Charges financières/VA
+- Taux de marge globale, bénéficiaire, brute d'exploitation
+- Taux d'obsolescence, Marge brute autofinancement
 
-The analysis includes a quick assessment of profitability and solvency based on these ratios.
+### 3. **Rentabilité** (6 ratios)
+- Rentabilité capitaux propres, économique, financière
+- Rentabilité brute ressources stables/capital exploitation
+- Rentabilité nette capital exploitation
+
+### 4. **Évolution** (4 ratios)
+- Taux variation: chiffre d'affaires, valeur ajoutée
+- Taux variation: résultat net, capitaux propres
+
+### 5. **Trésorerie & Financement** (4 ratios)
+- Capacité génération cash (2 méthodes)
+- Capacité remboursement, Crédits bancaires/BFR
+
+### 6. **Délais de Paiement** (2 ratios)
+- Délai créances clients (jours)
+- Délai dettes fournisseurs (jours)
+
+All ratios are calculated for both current year (N) and previous year (N-1) when applicable.
+
+## Tenant Risk Assessment
+
+The application provides professional tenant solvency evaluation with:
+
+### **Risk Levels:**
+- **Risque faible**: Healthy financial situation, favorable recommendation
+- **Risque moyen**: Mixed situation, recommendation with reservations
+- **Risque élevé**: Concerning situation, unfavorable recommendation
+
+### **Evaluation Criteria:**
+- Revenue stability and growth
+- Financial structure strength
+- Debt level and financial independence
+- Cash generation capacity
+- Profitability evolution
+- Working capital and payment terms management
 
 ## Project Structure
 ```
 financial-analysis-api/
 ├── main.py                  # FastAPI application with CORS
-├── app.py                   # Main orchestration logic
+├── app.py                   # Main tenant evaluation pipeline
 ├── clients.py               # AI client initialization (Gemini & Claude)
 ├── pdf_handler.py           # PDF download functionality
-├── gemini_service.py        # Gemini 2.5 Flash integration
-├── claude_service.py        # Claude 3.7 Sonnet integration
+├── gemini_service.py        # Gemini 2.5 Flash - Comprehensive ratio calculation
+├── claude_service.py        # Claude Sonnet 4 - Tenant solvency evaluation
 ├── logger.py                # Logger instance
 ├── logging_config.py        # Logging configuration
 ├── requirements.txt         # Python dependencies
