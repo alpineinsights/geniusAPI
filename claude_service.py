@@ -45,7 +45,7 @@ Do not include markdown, backticks, or any wrapping. Return only valid JSON."""
         logger.info("Starting Claude synthesis...")
         
         message = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-20250514",
             max_tokens=8192,
             temperature=0.1,
             system="You are a Senior Financial Analyst synthesizing an earnings report.",
