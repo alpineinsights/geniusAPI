@@ -8,21 +8,33 @@ A FastAPI application that enables financial professionals to analyze uploaded f
 - Download and process PDF financial documents directly from URLs
 - Dual-LLM analysis pipeline:
   1. **Gemini 2.5 Flash**: Calculates specific financial ratios and provides quick profitability/solvency analysis
-  2. **Claude 3.7 Sonnet**: Creates executive summary in French and formats financial ratios as JSON
+  2. **Claude 3.5 Sonnet**: Creates executive summary in French and formats financial ratios as JSON
 - French language output optimized for French financial analysis
 - Structured JSON response format
+- Modular architecture for easy maintenance and testing
+- CORS support for frontend integration
+- Clean ASCII logging for French content
 - Asynchronous processing for optimal performance
 
 ## Architecture
 
-The application uses a streamlined architecture:
+The application uses a modular, streamlined architecture:
 
-- **FastAPI Backend**: RESTful API interface
+- **FastAPI Backend**: RESTful API interface with CORS support
 - **PDF Processing**: Direct download and processing of PDF documents from URLs
 - **Dual-LLM Pipeline**:
   - **Gemini 2.5 Flash**: Analyzes PDFs to calculate financial ratios (marge d'exploitation, levier financier)
-  - **Claude 3.7 Sonnet**: Synthesizes analysis into French executive summary with structured JSON output
+  - **Claude 3.5 Sonnet**: Synthesizes analysis into French executive summary with structured JSON output
+- **Modular Design**: Separated into focused modules for maintainability
 - **Asynchronous Processing**: Parallel processing for optimal performance
+
+### Module Responsibilities
+
+- **`clients.py`**: Initializes and manages AI client connections
+- **`pdf_handler.py`**: Handles PDF download from URLs
+- **`gemini_service.py`**: Processes PDFs with Gemini for financial analysis
+- **`claude_service.py`**: Synthesizes Gemini output into structured JSON
+- **`app.py`**: Orchestrates the complete analysis pipeline
 
 ## API Endpoints
 
@@ -128,12 +140,16 @@ The analysis includes a quick assessment of profitability and solvency based on 
 ## Project Structure
 ```
 financial-analysis-api/
-├── main.py                  # FastAPI application
-├── app.py                   # Core analysis logic and LLM integration
+├── main.py                  # FastAPI application with CORS
+├── app.py                   # Main orchestration logic
+├── clients.py               # AI client initialization (Gemini & Claude)
+├── pdf_handler.py           # PDF download functionality
+├── gemini_service.py        # Gemini 2.5 Flash integration
+├── claude_service.py        # Claude 3.7 Sonnet integration
 ├── logger.py                # Logger instance
 ├── logging_config.py        # Logging configuration
 ├── requirements.txt         # Python dependencies
-├── .env                     # Environment variables (create from .env.example)
+├── .env                     # Environment variables
 ├── railway.json             # Railway deployment configuration
 └── README.md                # Project documentation
 ```
