@@ -151,6 +151,15 @@ Do not include markdown, backticks, or any wrapping. Return only valid JSON."""
         total_time = time.time() - start_time
         logger.info(f"Claude API: Total processing time: {total_time:.2f} seconds")
         
+        # Log Claude output in clean ASCII format
+        try:
+            claude_output_clean = response_text.encode('ascii', 'replace').decode('ascii')
+            logger.info("=== CLAUDE OUTPUT (ASCII) ===")
+            logger.info(claude_output_clean)
+            logger.info("=== END CLAUDE OUTPUT ===")
+        except Exception as log_err:
+            logger.warning(f"Could not log Claude output in ASCII format: {log_err}")
+        
         return response_text
         
     except Exception as e:
@@ -212,6 +221,16 @@ async def query_gemini_with_pdf(client: genai.Client, pdf_content: bytes, compan
             return "Error: Received an empty response from Gemini."
         
         logger.info("Gemini API: Successfully generated content.")
+        
+        # Log Gemini output in clean ASCII format
+        try:
+            gemini_output_clean = response.text.encode('ascii', 'replace').decode('ascii')
+            logger.info("=== GEMINI OUTPUT (ASCII) ===")
+            logger.info(gemini_output_clean)
+            logger.info("=== END GEMINI OUTPUT ===")
+        except Exception as log_err:
+            logger.warning(f"Could not log Gemini output in ASCII format: {log_err}")
+        
         return response.text
 
     except Exception as e:
@@ -296,7 +315,15 @@ async def run_analysis(company_name: str, pdf_url: str):
 
                 claude_duration = time.time() - claude_start
                 logger.info(f"Completed Claude synthesis in {claude_duration:.2f} seconds")
-                logger.info(f"CLAUDE JSON OUTPUT: {claude_response}")
+                
+                # Log cleaned Claude response in ASCII format
+                try:
+                    claude_response_clean = claude_response.encode('ascii', 'replace').decode('ascii')
+                    logger.info("=== CLAUDE FINAL JSON OUTPUT (ASCII) ===")
+                    logger.info(claude_response_clean)
+                    logger.info("=== END CLAUDE FINAL JSON OUTPUT ===")
+                except Exception as log_err:
+                    logger.warning(f"Could not log Claude final output in ASCII format: {log_err}")
                 
                 # Validate Claude response
                 try:
@@ -345,7 +372,15 @@ async def run_analysis(company_name: str, pdf_url: str):
                 }
             }
         
-        logger.info(f"FINAL ANALYSIS JSON OUTPUT: {json.dumps(final_response, indent=2)}")
+        # Log final response in clean ASCII format
+        try:
+            final_response_str = json.dumps(final_response, indent=2, ensure_ascii=True)
+            logger.info("=== FINAL ANALYSIS JSON OUTPUT (ASCII) ===")
+            logger.info(final_response_str)
+            logger.info("=== END FINAL ANALYSIS JSON OUTPUT ===")
+        except Exception as log_err:
+            logger.warning(f"Could not log final response in ASCII format: {log_err}")
+            
         return final_response
 
     except Exception as e:
