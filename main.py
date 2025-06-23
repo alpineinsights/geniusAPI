@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import time
 import json
@@ -16,9 +17,18 @@ logger.info("Starting FastAPI Financial Insights Application")
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Financial Insights API",
-    description="API for generating financial insights about companies using the multi-LLM pipeline from app.py",
-    version="1.0.1" # Increment version
+    title="Financial Analysis API",
+    description="API for analyzing financial accounts using dual-LLM pipeline (Gemini + Claude)",
+    version="1.0.2"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://spirit-genius-beta.lovable.app"],  # Your frontend domain
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Accept", "User-Agent", "Authorization"],
 )
 
 # Input model
