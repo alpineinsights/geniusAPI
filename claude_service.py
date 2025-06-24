@@ -125,73 +125,71 @@ Output attendu : Format JSON avec ratios clés + chiffres clés + analyse financ
 Objectif final : Déterminer la fiabilité de l'entreprise en tant que futur locataire et formuler une recommandation argumentée.
 
 FORMAT DE SORTIE ÉTAPE 2 (SORTIE FINALE)
-Votre réponse doit contenir exactement ces trois éléments dans cet ordre :
+Votre réponse doit être un JSON unique contenant ces trois sections :
 
-1. RATIOS CLÉS (Format JSON)
 {{
-  "rentabilite": {{
-    "annee_n": {{
-      "rentabilite_capitaux_propres_pct": "valeur",
-      "rentabilite_economique_pct": "valeur",
-      "rentabilite_financiere_pct": "valeur",
-      "rentabilite_brute_ressources_stables_pct": "valeur",
-      "rentabilite_brute_capital_exploitation_pct": "valeur"
+  "ratios_cles": {{
+    "rentabilite": {{
+      "annee_n": {{
+        "rentabilite_capitaux_propres_pct": "valeur",
+        "rentabilite_economique_pct": "valeur",
+        "rentabilite_financiere_pct": "valeur",
+        "rentabilite_brute_ressources_stables_pct": "valeur",
+        "rentabilite_brute_capital_exploitation_pct": "valeur"
+      }},
+      "annee_n_moins_1": {{
+        "rentabilite_capitaux_propres_pct": "valeur",
+        "rentabilite_economique_pct": "valeur",
+        "rentabilite_financiere_pct": "valeur",
+        "rentabilite_brute_ressources_stables_pct": "valeur",
+        "rentabilite_brute_capital_exploitation_pct": "valeur"
+      }}
     }},
-    "annee_n_moins_1": {{
-      "rentabilite_capitaux_propres_pct": "valeur",
-      "rentabilite_economique_pct": "valeur",
-      "rentabilite_financiere_pct": "valeur",
-      "rentabilite_brute_ressources_stables_pct": "valeur",
-      "rentabilite_brute_capital_exploitation_pct": "valeur"
+    "evolution": {{
+      "taux_variation_chiffre_affaires_pct": "valeur",
+      "taux_variation_valeur_ajoutee_pct": "valeur", 
+      "taux_variation_resultat_pct": "valeur",
+      "taux_variation_capitaux_propres_pct": "valeur"
+    }},
+    "tresorerie_financement": {{
+      "annee_n": {{
+        "capacite_generer_cash": "valeur",
+        "capacite_remboursement_dette": "valeur",
+        "credits_bancaires_bfr": "valeur"
+      }},
+      "annee_n_moins_1": {{
+        "capacite_generer_cash": "valeur", 
+        "capacite_remboursement_dette": "valeur",
+        "credits_bancaires_bfr": "valeur"
+      }}
+    }},
+    "delais_paiement": {{
+      "annee_n": {{
+        "delai_creance_clients_jours": "valeur",
+        "delai_dettes_fournisseurs_jours": "valeur"
+      }},
+      "annee_n_moins_1": {{
+        "delai_creance_clients_jours": "valeur",
+        "delai_dettes_fournisseurs_jours": "valeur"
+      }}
     }}
   }},
-  "evolution": {{
-    "taux_variation_chiffre_affaires_pct": "valeur",
-    "taux_variation_valeur_ajoutee_pct": "valeur", 
-    "taux_variation_resultat_pct": "valeur",
-    "taux_variation_capitaux_propres_pct": "valeur"
+  "chiffres_cles": {{
+    "chiffre_affaires_n": "valeur en K€",
+    "chiffre_affaires_n_moins_1": "valeur en K€",
+    "resultat_exploitation_n": "valeur en K€",
+    "resultat_exploitation_n_moins_1": "valeur en K€",
+    "marge_exploitation_n": "valeur en %",
+    "marge_exploitation_n_moins_1": "valeur en %",
+    "resultat_net_n": "valeur en K€",
+    "resultat_net_n_moins_1": "valeur en K€",
+    "capitaux_propres_n": "valeur en K€",
+    "capitaux_propres_n_moins_1": "valeur en K€",
+    "dette_financiere_n": "valeur en K€",
+    "dette_financiere_n_moins_1": "valeur en K€"
   }},
-  "tresorerie_financement": {{
-    "annee_n": {{
-      "capacite_generer_cash": "valeur",
-      "capacite_remboursement_dette": "valeur",
-      "credits_bancaires_bfr": "valeur"
-    }},
-    "annee_n_moins_1": {{
-      "capacite_generer_cash": "valeur", 
-      "capacite_remboursement_dette": "valeur",
-      "credits_bancaires_bfr": "valeur"
-    }}
-  }},
-  "delais_paiement": {{
-    "annee_n": {{
-      "delai_creance_clients_jours": "valeur",
-      "delai_dettes_fournisseurs_jours": "valeur"
-    }},
-    "annee_n_moins_1": {{
-      "delai_creance_clients_jours": "valeur",
-      "delai_dettes_fournisseurs_jours": "valeur"
-    }}
-  }}
+  "analyse_financiere": "Texte de l'analyse complète de 800 mots"
 }}
-
-2. CHIFFRES CLÉS (Format JSON)
-{{
-  "chiffre_affaires_n": "valeur en K€",
-  "chiffre_affaires_n_moins_1": "valeur en K€",
-  "resultat_exploitation_n": "valeur en K€",
-  "resultat_exploitation_n_moins_1": "valeur en K€",
-  "marge_exploitation_n": "valeur en %",
-  "marge_exploitation_n_moins_1": "valeur en %",
-  "resultat_net_n": "valeur en K€",
-  "resultat_net_n_moins_1": "valeur en K€",
-  "capitaux_propres_n": "valeur en K€",
-  "capitaux_propres_n_moins_1": "valeur en K€",
-  "dette_financiere_n": "valeur en K€",
-  "dette_financiere_n_moins_1": "valeur en K€"
-}}
-
-3. ANALYSE FINANCIÈRE (800 mots)
 
 ANALYSE FINANCIÈRE À PRODUIRE
 Objectif : Rédiger une analyse complète de 800 mots environ basée exclusivement sur les ratios calculés à l'étape 1.
@@ -279,10 +277,12 @@ INSTRUCTIONS FINALES
 1. Calculez d'abord tous les ratios requis à l'étape 1 (calcul interne)
 2. Vérifiez que tous les ratios sont calculés avant de procéder à l'analyse
 3. Utilisez ces ratios et uniquement ces ratios pour produire l'analyse finale de l'étape 2
-4. Ne montrez que la sortie de l'étape 2 : JSON ratios clés + JSON chiffres clés + Analyse de 800 mots
+4. Retournez UNIQUEMENT le JSON structuré avec les trois sections : ratios_cles, chiffres_cles, analyse_financiere
 
-Ton : Professionnel, précis, factuel
-Format : JSON ratios clés + JSON chiffres clés + analyse complète avec phrases courtes, données chiffrées, pourcentages précis
+IMPORTANT : Votre réponse doit être un JSON valide et complet. Ne pas ajouter de texte avant ou après le JSON.
+
+Ton pour l'analyse : Professionnel, précis, factuel
+Format de l'analyse : Texte de 800 mots avec phrases courtes, données chiffrées, pourcentages précis
 Conclusion : Recommandation claire avec niveau de risque explicite
 
 Conclusion type à adapter dans l'analyse :

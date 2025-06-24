@@ -65,11 +65,13 @@ async def run_analysis(company_name: str, pdf_url: str):
                 else:
                     claude_response = claude_response_raw.strip()
 
-                # Validate Claude response
+                # Validate Claude response as JSON
                 try:
                     json.loads(claude_response)
+                    logger.info("Claude returned valid JSON response")
                 except json.JSONDecodeError as validate_err:
                     logger.error(f"Claude returned invalid JSON: {validate_err}")
+                    logger.error(f"Claude response sample: {claude_response[:500]}")
                     claude_response = json.dumps({"status": "error", "message": f"Claude returned invalid JSON: {validate_err}"}, indent=2)
             except Exception as e_claude:
                 logger.error(f"Claude synthesis error: {e_claude}")
@@ -79,37 +81,46 @@ async def run_analysis(company_name: str, pdf_url: str):
         source_list_json = [{"name": "PDF Document", "url": pdf_url, "category": "Company data"}]
 
         # Determine final response based on success/failure of steps
-        if claude_client and not claude_response.startswith("Error:"):
-            try:
-                parsed_claude_json = json.loads(claude_response)
-                # Inject sources into the parsed JSON
-                if 'data' in parsed_claude_json and isinstance(parsed_claude_json['data'], dict):
-                    parsed_claude_json['data']['sources'] = source_list_json
-                elif 'data' not in parsed_claude_json:
-                    parsed_claude_json['data'] = {'sources': source_list_json}
-                else:
-                    parsed_claude_json['data'] = {'sources': source_list_json}
-                 
-                final_response = parsed_claude_json
-
-            except json.JSONDecodeError as e:
-                logger.error(f"Failed to parse Claude response as JSON: {e}")
-                final_response = {
-                    "status": "error",
-                    "message": "Claude synthesis failed to produce valid JSON. Falling back to Gemini output.",
-                    "details": f"Claude raw output (stripped, truncated): {claude_response[:500]}...",
-                    "gemini_output_markdown": gemini_output,
-                    "sources": source_list_json
-                }
-        else:
-            # Claude not available or failed, return Gemini output
+        if claude_client and not claude_response.startswith("Error:") and not claude_response.startswith('{"status": "error"'):
+            # Claude returns mixed format (JSON + text), so handle as text response
             final_response = {
                 "status": "success",
                 "data": {
-                    "geminiAnalysis": gemini_output,
+                    "claudeAnalysis": claude_response,
+                    "geminiRawData": gemini_output,
                     "sources": source_list_json
                 }
             }
+        else:
+            # Claude not available or failed, return Gemini output
+            if claude_response.startswith('{"status": "error"'):
+                # Claude returned an error, parse it
+                try:
+                    claude_error = json.loads(claude_response)
+                    final_response = {
+                        "status": "error",
+                        "message": f"Claude analysis failed: {claude_error.get('message', 'Unknown error')}",
+                        "details": claude_response,
+                        "gemini_output": gemini_output,
+                        "sources": source_list_json
+                    }
+                except json.JSONDecodeError:
+                    final_response = {
+                        "status": "error",
+                        "message": "Claude analysis failed with parsing error",
+                        "details": claude_response[:500] + "..." if len(claude_response) > 500 else claude_response,
+                        "gemini_output": gemini_output,
+                        "sources": source_list_json
+                    }
+            else:
+                # Claude not available, return Gemini output
+                final_response = {
+                    "status": "success",
+                    "data": {
+                        "geminiAnalysis": gemini_output,
+                        "sources": source_list_json
+                    }
+                }
         
         # Log final response in clean ASCII format
         try:
