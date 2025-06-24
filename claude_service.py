@@ -291,126 +291,6 @@ Conclusion type à adapter dans l'analyse :
 
         logger.info("Starting Claude synthesis...")
         
-        # Define the structured output schema
-        response_schema = {
-            "type": "object",
-            "properties": {
-                "ratios_cles": {
-                    "type": "object",
-                    "properties": {
-                        "rentabilite": {
-                            "type": "object",
-                            "properties": {
-                                "annee_n": {
-                                    "type": "object",
-                                    "properties": {
-                                        "rentabilite_capitaux_propres_pct": {"type": ["number", "string"]},
-                                        "rentabilite_economique_pct": {"type": ["number", "string"]},
-                                        "rentabilite_financiere_pct": {"type": ["number", "string"]},
-                                        "rentabilite_brute_ressources_stables_pct": {"type": ["number", "string"]},
-                                        "rentabilite_brute_capital_exploitation_pct": {"type": ["number", "string"]}
-                                    },
-                                    "required": ["rentabilite_capitaux_propres_pct", "rentabilite_economique_pct", "rentabilite_financiere_pct", "rentabilite_brute_ressources_stables_pct", "rentabilite_brute_capital_exploitation_pct"]
-                                },
-                                "annee_n_moins_1": {
-                                    "type": "object",
-                                    "properties": {
-                                        "rentabilite_capitaux_propres_pct": {"type": ["number", "string"]},
-                                        "rentabilite_economique_pct": {"type": ["number", "string"]},
-                                        "rentabilite_financiere_pct": {"type": ["number", "string"]},
-                                        "rentabilite_brute_ressources_stables_pct": {"type": ["number", "string"]},
-                                        "rentabilite_brute_capital_exploitation_pct": {"type": ["number", "string"]}
-                                    },
-                                    "required": ["rentabilite_capitaux_propres_pct", "rentabilite_economique_pct", "rentabilite_financiere_pct", "rentabilite_brute_ressources_stables_pct", "rentabilite_brute_capital_exploitation_pct"]
-                                }
-                            },
-                            "required": ["annee_n", "annee_n_moins_1"]
-                        },
-                        "evolution": {
-                            "type": "object",
-                            "properties": {
-                                "taux_variation_chiffre_affaires_pct": {"type": ["number", "string"]},
-                                "taux_variation_valeur_ajoutee_pct": {"type": ["number", "string"]},
-                                "taux_variation_resultat_pct": {"type": ["number", "string"]},
-                                "taux_variation_capitaux_propres_pct": {"type": ["number", "string"]}
-                            },
-                            "required": ["taux_variation_chiffre_affaires_pct", "taux_variation_valeur_ajoutee_pct", "taux_variation_resultat_pct", "taux_variation_capitaux_propres_pct"]
-                        },
-                        "tresorerie_financement": {
-                            "type": "object",
-                            "properties": {
-                                "annee_n": {
-                                    "type": "object",
-                                    "properties": {
-                                        "capacite_generer_cash": {"type": ["number", "string"]},
-                                        "capacite_remboursement_dette": {"type": ["number", "string"]},
-                                        "credits_bancaires_bfr": {"type": ["number", "string"]}
-                                    },
-                                    "required": ["capacite_generer_cash", "capacite_remboursement_dette", "credits_bancaires_bfr"]
-                                },
-                                "annee_n_moins_1": {
-                                    "type": "object",
-                                    "properties": {
-                                        "capacite_generer_cash": {"type": ["number", "string"]},
-                                        "capacite_remboursement_dette": {"type": ["number", "string"]},
-                                        "credits_bancaires_bfr": {"type": ["number", "string"]}
-                                    },
-                                    "required": ["capacite_generer_cash", "capacite_remboursement_dette", "credits_bancaires_bfr"]
-                                }
-                            },
-                            "required": ["annee_n", "annee_n_moins_1"]
-                        },
-                        "delais_paiement": {
-                            "type": "object",
-                            "properties": {
-                                "annee_n": {
-                                    "type": "object",
-                                    "properties": {
-                                        "delai_creance_clients_jours": {"type": ["number", "string"]},
-                                        "delai_dettes_fournisseurs_jours": {"type": ["number", "string"]}
-                                    },
-                                    "required": ["delai_creance_clients_jours", "delai_dettes_fournisseurs_jours"]
-                                },
-                                "annee_n_moins_1": {
-                                    "type": "object",
-                                    "properties": {
-                                        "delai_creance_clients_jours": {"type": ["number", "string"]},
-                                        "delai_dettes_fournisseurs_jours": {"type": ["number", "string"]}
-                                    },
-                                    "required": ["delai_creance_clients_jours", "delai_dettes_fournisseurs_jours"]
-                                }
-                            },
-                            "required": ["annee_n", "annee_n_moins_1"]
-                        }
-                    },
-                    "required": ["rentabilite", "evolution", "tresorerie_financement", "delais_paiement"]
-                },
-                "chiffres_cles": {
-                    "type": "object",
-                    "properties": {
-                        "chiffre_affaires_n": {"type": "string"},
-                        "chiffre_affaires_n_moins_1": {"type": "string"},
-                        "resultat_exploitation_n": {"type": "string"},
-                        "resultat_exploitation_n_moins_1": {"type": "string"},
-                        "marge_exploitation_n": {"type": "string"},
-                        "marge_exploitation_n_moins_1": {"type": "string"},
-                        "resultat_net_n": {"type": "string"},
-                        "resultat_net_n_moins_1": {"type": "string"},
-                        "capitaux_propres_n": {"type": "string"},
-                        "capitaux_propres_n_moins_1": {"type": "string"},
-                        "dette_financiere_n": {"type": "string"},
-                        "dette_financiere_n_moins_1": {"type": "string"}
-                    },
-                    "required": ["chiffre_affaires_n", "chiffre_affaires_n_moins_1", "resultat_exploitation_n", "resultat_exploitation_n_moins_1", "marge_exploitation_n", "marge_exploitation_n_moins_1", "resultat_net_n", "resultat_net_n_moins_1", "capitaux_propres_n", "capitaux_propres_n_moins_1", "dette_financiere_n", "dette_financiere_n_moins_1"]
-                },
-                "analyse_financiere": {
-                    "type": "string",
-                    "description": "Analyse financière complète de 800 mots suivant la structure obligatoire définie"
-                }
-            },
-            "required": ["ratios_cles", "chiffres_cles", "analyse_financiere"]
-        }
-        
         message = client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=8192,
@@ -418,52 +298,22 @@ Conclusion type à adapter dans l'analyse :
             system="Vous êtes un analyste financier senior spécialisé dans l'évaluation de solvabilité locative.",
             messages=[
                 {"role": "user", "content": prompt}
-            ],
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "analyse_financiere_complete",
-                    "description": "Analyse financière structurée avec ratios clés, chiffres clés et analyse textuelle",
-                    "schema": response_schema
-                }
-            }
+            ]
         )
         
         # Parse the structured response
         try:
             response_text = message.content[0].text
-            parsed_response = json.loads(response_text)
             
-            # Convert back to JSON string for consistent handling
-            response_text = json.dumps(parsed_response, indent=2, ensure_ascii=False)
+            # Try to parse as JSON if it looks like JSON
+            if response_text.strip().startswith('{'):
+                parsed_response = json.loads(response_text)
+                # Convert back to JSON string for consistent handling
+                response_text = json.dumps(parsed_response, indent=2, ensure_ascii=False)
             
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse Claude JSON response: {e}")
-            # Return error in expected format
-            error_response = {
-                "ratios_cles": {
-                    "rentabilite": {"annee_n": {}, "annee_n_moins_1": {}},
-                    "evolution": {},
-                    "tresorerie_financement": {"annee_n": {}, "annee_n_moins_1": {}},
-                    "delais_paiement": {"annee_n": {}, "annee_n_moins_1": {}}
-                },
-                "chiffres_cles": {
-                    "chiffre_affaires_n": "Non disponible",
-                    "chiffre_affaires_n_moins_1": "Non disponible",
-                    "resultat_exploitation_n": "Non disponible",
-                    "resultat_exploitation_n_moins_1": "Non disponible",
-                    "marge_exploitation_n": "Non disponible",
-                    "marge_exploitation_n_moins_1": "Non disponible",
-                    "resultat_net_n": "Non disponible",
-                    "resultat_net_n_moins_1": "Non disponible",
-                    "capitaux_propres_n": "Non disponible",
-                    "capitaux_propres_n_moins_1": "Non disponible",
-                    "dette_financiere_n": "Non disponible",
-                    "dette_financiere_n_moins_1": "Non disponible"
-                },
-                "analyse_financiere": f"Erreur lors du parsing de la réponse Claude: {e}"
-            }
-            response_text = json.dumps(error_response, indent=2, ensure_ascii=False)
+            logger.warning(f"Claude response is not JSON, treating as plain text: {e}")
+            # Keep the original response text if it's not JSON
         
         total_time = time.time() - start_time
         logger.info(f"Claude completed in {total_time:.2f}s")
