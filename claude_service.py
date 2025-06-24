@@ -291,34 +291,58 @@ Conclusion type à adapter dans l'analyse :
 
         logger.info("Starting Claude synthesis...")
         
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=8192,
-            temperature=0.2,
-            system="Vous êtes un analyste financier senior spécialisé dans l'évaluation de solvabilité locative.",
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
-        )
-        
-        # Parse the structured response
         try:
+            message = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=8192,
+                temperature=0.2,
+                system="Vous êtes un analyste financier senior spécialisé dans l'évaluation de solvabilité locative.",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            total_time = time.time() - start_time
+            logger.info(f"Claude completed in {total_time:.2f}s")
+            
+            # Extract response text with better error handling
+            if not message or not message.content or len(message.content) == 0:
+                logger.error("Claude returned empty message or content")
+                return json.dumps({"status": "error", "message": "Claude returned empty response"}, indent=2)
+            
             response_text = message.content[0].text
             
-            # Try to parse as JSON if it looks like JSON
-            if response_text.strip().startswith('{'):
-                parsed_response = json.loads(response_text)
-                # Convert back to JSON string for consistent handling
-                response_text = json.dumps(parsed_response, indent=2, ensure_ascii=False)
+            if not response_text or response_text.strip() == "":
+                logger.error("Claude returned empty text content")
+                return json.dumps({"status": "error", "message": "Claude returned empty text content"}, indent=2)
             
-        except json.JSONDecodeError as e:
-            logger.warning(f"Claude response is not JSON, treating as plain text: {e}")
-            # Keep the original response text if it's not JSON
-        
-        total_time = time.time() - start_time
-        logger.info(f"Claude completed in {total_time:.2f}s")
-        
-        return response_text
+            logger.info(f"Claude response length: {len(response_text)} characters")
+            
+            # Try to parse as JSON if it looks like JSON
+            response_text_stripped = response_text.strip()
+            
+            if response_text_stripped.startswith('{') and response_text_stripped.endswith('}'):
+                try:
+                    parsed_response = json.loads(response_text_stripped)
+                    logger.info("Claude returned valid JSON response")
+                    # Convert back to JSON string for consistent handling
+                    response_text = json.dumps(parsed_response, indent=2, ensure_ascii=False)
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Claude response looks like JSON but failed to parse: {e}")
+                    logger.warning(f"First 200 chars of response: {response_text_stripped[:200]}")
+                    # Keep the original response text
+            else:
+                logger.info("Claude response is not JSON format, treating as plain text")
+                # Log a sample of the response for debugging
+                logger.debug(f"Claude response sample (first 500 chars): {response_text_stripped[:500]}")
+            
+            return response_text
+            
+        except Exception as api_error:
+            logger.error(f"Claude API call failed: {str(api_error)}", exc_info=True)
+            total_time = time.time() - start_time
+            logger.info(f"Claude failed after {total_time:.2f}s")
+            return json.dumps({"status": "error", "message": f"Claude API error: {str(api_error)}"}, indent=2)
         
     except Exception as e:
         logger.error(f"Claude API error: {str(e)}")
