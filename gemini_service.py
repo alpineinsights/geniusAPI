@@ -1,6 +1,7 @@
 import time
 import asyncio
 import functools
+import json
 from google import genai
 from google.genai import types
 from logger import logger
@@ -133,17 +134,79 @@ Instructions strictes à respecter
             logger.error("Gemini returned empty response")
             return "Error: Received an empty response from Gemini."
         
-        # Log Gemini output in clean ASCII format
+        # Validate JSON structure and provide clean logging
         try:
-            gemini_output_clean = response.text.encode('ascii', 'replace').decode('ascii')
-            logger.info("=== GEMINI OUTPUT ===")
-            logger.info(gemini_output_clean)
-            logger.info("=== END GEMINI OUTPUT ===")
-        except Exception:
-            logger.warning("Could not log Gemini output in ASCII format")
+            # Try to parse the JSON to validate it
+            parsed_json = json.loads(response.text)
+            
+            # Additional validation: check if it's a list with expected structure
+            if isinstance(parsed_json, list):
+                valid_entries = 0
+                for entry in parsed_json[:5]:  # Check first 5 entries
+                    if isinstance(entry, dict) and "intitulé" in entry and "année" in entry and "valeur" in entry:
+                        valid_entries += 1
+                
+                if valid_entries > 0:
+                    logger.info(f"Gemini returned valid JSON list with {len(parsed_json)} entries")
+                    
+                    # Create a summary of the data for cleaner logging
+                    logger.info("=== GEMINI OUTPUT SUMMARY ===")
+                    logger.info(f"Total entries extracted: {len(parsed_json)}")
+                    
+                    # Group by year for better readability
+                    years = {}
+                    for entry in parsed_json:
+                        if isinstance(entry, dict) and "année" in entry:
+                            year = entry["année"]
+                            if year not in years:
+                                years[year] = []
+                            years[year].append(entry)
+                    
+                    for year in sorted(years.keys(), reverse=True):
+                        logger.info(f"\n--- Année {year} ({len(years[year])} entrées) ---")
+                        for entry in years[year][:10]:  # Show first 10 entries per year
+                            intitule = entry.get("intitulé", "N/A")
+                            valeur = entry.get("valeur")
+                            if valeur is not None:
+                                logger.info(f"  • {intitule}: {valeur}")
+                            else:
+                                logger.info(f"  • {intitule}: null")
+                        
+                        if len(years[year]) > 10:
+                            logger.info(f"  ... et {len(years[year]) - 10} autres entrées")
+                    
+                    logger.info("=== END GEMINI OUTPUT SUMMARY ===")
+                else:
+                    logger.warning("Gemini JSON entries don't match expected structure")
+                    logger.info(f"Raw response (first 500 chars): {response.text[:500]}")
+            else:
+                logger.warning("Gemini response is valid JSON but not a list as expected")
+                logger.info(f"Response type: {type(parsed_json)}")
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"Gemini returned invalid JSON: {e}")
+            logger.error(f"Raw Gemini response (first 1000 chars): {response.text[:1000]}")
+            
+            # Try to extract JSON from the response if it's wrapped in text
+            text = response.text.strip()
+            
+            # Look for JSON array patterns
+            start_idx = text.find('[')
+            end_idx = text.rfind(']')
+            
+            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                try:
+                    json_part = text[start_idx:end_idx + 1]
+                    parsed_json = json.loads(json_part)
+                    logger.info("Successfully extracted JSON from Gemini response")
+                    return json.dumps(parsed_json, ensure_ascii=False)
+                except json.JSONDecodeError:
+                    logger.error("Could not extract valid JSON from Gemini response")
+            
+            return f"Error: Gemini returned malformed JSON: {str(e)}"
         
         return response.text
 
     except Exception as e:
-        logger.error(f"Gemini analysis failed: {str(e)}")
+        logger.error(f"Gemini analysis failed: {str(e)}", exc_info=True)
         return f"An error occurred during the Gemini analysis process: {str(e)}" 
