@@ -25,7 +25,8 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://*.lovableproject.com", "https://spirit-genius-beta.lovable.app"],
+    allow_origins=["*"],
+
   # Your frontend domain
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
