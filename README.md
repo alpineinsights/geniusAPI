@@ -8,8 +8,8 @@ A FastAPI application that enables financial professionals to evaluate tenant so
 - **Tenant Solvency Evaluation**: Specialized analysis for commercial rental decisions
 - **PDF Processing**: Direct download and analysis of financial documents from URLs
 - **Dual-LLM Pipeline**:
-  1. **Gemini 2.5 Flash**: Calculates comprehensive financial ratios from balance sheets and income statements
-  2. **Claude Sonnet 4**: Performs detailed tenant solvency analysis with risk assessment
+  1. **Gemini 2.5 Flash**: Extracts financial datas from balance sheets and income statements
+  2. **Claude Sonnet 4**: Calculates 40+ financial ratios and performs detailed tenant solvency analysis with risk assessment
 - **Structured Output**: JSON key figures + 800-word detailed French analysis
 - **Risk Assessment**: Clear recommendations (favorable/reserved/unfavorable)
 - **French Language**: Optimized for French financial analysis and tenant evaluation
@@ -24,8 +24,8 @@ The application uses a comprehensive, modular architecture designed for professi
 - **FastAPI Backend**: RESTful API interface with CORS support
 - **PDF Processing**: Direct download and processing of financial documents from URLs
 - **Comprehensive Analysis Pipeline**:
-  - **Gemini 2.5 Flash**: Extracts and calculates 40+ financial ratios from balance sheets and income statements
-  - **Claude Sonnet 4**: Performs detailed tenant solvency analysis with structured risk assessment
+  - **Gemini 2.5 Flash**: Extracts financial information balance sheets and income statements
+  - **Claude Sonnet 4**: calculates 40+ financial ratios from gemini's output and performs detailed tenant solvency analysis with structured risk assessment
 - **Financial Ratio Categories**: 6 major categories covering all aspects of financial health
 - **Structured Output**: JSON key figures + comprehensive 800-word analysis
 - **Risk Evaluation**: Professional tenant risk assessment with clear recommendations
@@ -34,8 +34,8 @@ The application uses a comprehensive, modular architecture designed for professi
 
 - **`clients.py`**: Initializes and manages AI client connections (Gemini & Claude)
 - **`pdf_handler.py`**: Handles PDF download and processing from URLs
-- **`gemini_service.py`**: Comprehensive financial ratio calculation (40+ ratios)
-- **`claude_service.py`**: Tenant solvency evaluation with risk assessment
+- **`gemini_service.py`**: Extraction of information from the PDF document
+- **`claude_service.py`**: Comprehensive financial ratio calculation (40+ ratios) and tenant solvency evaluation with risk assessment
 - **`app.py`**: Orchestrates the complete tenant evaluation pipeline
 
 ## API Endpoints
@@ -187,8 +187,8 @@ financial-analysis-api/
 ├── app.py                   # Main tenant evaluation pipeline
 ├── clients.py               # AI client initialization (Gemini & Claude)
 ├── pdf_handler.py           # PDF download functionality
-├── gemini_service.py        # Gemini 2.5 Flash - Comprehensive ratio calculation
-├── claude_service.py        # Claude Sonnet 4 - Tenant solvency evaluation
+├── gemini_service.py        # Gemini 2.5 Flash - extraction of financial data
+├── claude_service.py        # Claude Sonnet 4 - ratio calculation and tenant solvency evaluation
 ├── logger.py                # Logger instance
 ├── logging_config.py        # Logging configuration
 ├── requirements.txt         # Python dependencies
