@@ -111,7 +111,13 @@ EN CAS DE DONNÉES MANQUANTES
 Si un élément comptable n'apparaît pas dans les états financiers, indiquer uniquement "Donnée non disponible" et marquer le ratio comme "Non calculable".
 
 VÉRIFICATION OBLIGATOIRE AVANT ANALYSE
-Avant de commencer l'analyse, vérifiez que tous les ratios listés ont été calculés (ou marqués 'Non calculable' si données manquantes). Aucune analyse ne peut débuter sans cette vérification complète.
+ÉTAPE CRITIQUE : Avant de commencer l'analyse de l'étape 2, vous DEVEZ :
+1. Vérifier que CHAQUE ratio de la liste ci-dessus a été calculé pour les deux exercices
+2. Pour chaque ratio manquant, indiquer explicitement "Non calculable" avec la raison
+3. Compter le nombre total de ratios calculés vs le nombre total demandé
+4. Ne JAMAIS procéder à l'analyse finale sans avoir tenté de calculer tous les ratios
+
+OBLIGATION : Si un ratio n'apparaît pas dans vos calculs internes, vous DEVEZ l'ajouter avec une valeur ou "Non calculable". Aucune analyse ne peut débuter sans cette vérification complète de TOUS les ratios demandés.
 
 ═══════════════════════════════════════════════════════════════════════════════════
 
@@ -274,10 +280,14 @@ Si un ratio n'est pas calculable ou manquant, l'indiquer clairement dans l'analy
 ═══════════════════════════════════════════════════════════════════════════════════
 
 INSTRUCTIONS FINALES
-1. Calculez d'abord tous les ratios requis à l'étape 1 (calcul interne)
-2. Vérifiez que tous les ratios sont calculés avant de procéder à l'analyse
-3. Utilisez ces ratios et uniquement ces ratios pour produire l'analyse finale de l'étape 2
-4. Retournez UNIQUEMENT le JSON structuré avec les trois sections : ratios_cles, chiffres_cles, analyse_financiere
+1. Calculez d'abord TOUS les ratios requis à l'étape 1 (calcul interne) - AUCUNE EXCEPTION
+2. Vérifiez que CHAQUE ratio de chaque catégorie est calculé avant de procéder à l'analyse
+3. Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratios) + Rentabilité (5 ratios) + Évolution (4 ratios) + Trésorerie & Financement (3 ratios) + Délais de Paiement (2 ratios) = 41 ratios MINIMUM
+4. Si un ratio ne peut être calculé, l'indiquer explicitement comme "Non calculable" avec la raison
+5. Utilisez ces ratios et uniquement ces ratios pour produire l'analyse finale de l'étape 2
+6. Retournez UNIQUEMENT le JSON structuré avec les trois sections : ratios_cles, chiffres_cles, analyse_financiere
+
+CONTRÔLE QUALITÉ : Votre analyse doit référencer des ratios concrets. Si vous mentionnez un ratio dans l'analyse, il DOIT avoir été calculé à l'étape 1.
 
 IMPORTANT : Votre réponse doit être un JSON valide et complet. Ne pas ajouter de texte avant ou après le JSON.
 

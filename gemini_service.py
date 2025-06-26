@@ -102,7 +102,9 @@ Instructions strictes à respecter
 •	Ne pas interpréter ou compléter une donnée absente
 •	Ne pas faire d'analyse ou de commentaire
 •	Ne pas changer ou convertir les unités du document
-•	Si une donnée est absente pour une des deux années, ne pas l'inventer""")
+•	Si une donnée est absente pour une des deux années, ne pas l'inventer
+•	Si une valeur est zéro dans le document, utiliser 0 et non null
+•	Utiliser null uniquement pour les données véritablement absentes du document""")
                 ]
             )
         ]
