@@ -4,11 +4,12 @@ import json
 from clients import initialize_gemini, initialize_claude
 from pdf_handler import download_pdf_from_url
 from gemini_service import query_gemini_with_pdf
+from claude_ratio_service import query_claude_for_ratios
 from claude_service import query_claude
 from logger import logger
 
 
-async def run_analysis(company_name: str, pdf_url: str):
+async def run_analysis(company_name: str, pdf_url: str, annual_rent: str):
     """Runs the financial analysis pipeline for uploaded PDF accounts"""
     logger.info(f"Starting analysis for {company_name}")
 
@@ -20,118 +21,111 @@ async def run_analysis(company_name: str, pdf_url: str):
         return {"status": "error", "message": "Error: Failed to initialize AI clients.", "sources": []}
 
     try:
-        # 1. Download PDF from URL
+        # STEP 1: Download PDF from URL
+        logger.info("Step 1: Downloading PDF...")
         pdf_content = await download_pdf_from_url(pdf_url)
         
-        # 2. Run Gemini Analysis with PDF
+        # STEP 2: Extract financial data with Gemini
+        logger.info("Step 2: Extracting financial data with Gemini...")
         gemini_output = await query_gemini_with_pdf(gemini_client, pdf_content, company_name)
 
-        # Error handling 
+        # Error handling for Gemini
         if gemini_output.startswith("Error"):
-            logger.error("Gemini analysis failed")
-            error_response = {
+            logger.error("Gemini financial data extraction failed")
+            return {
                 "status": "error", 
-                "message": "Document analysis failed",
-                "details": gemini_output,
-                "sources": [{"name": "PDF Document", "url": pdf_url, "category": "Company data"}]
+                "message": "Financial data extraction failed",
+                "details": gemini_output
             }
-            return error_response
         
-        # 3. Synthesize with Claude (if available)
+        # STEP 3: Calculate ratios with Claude Ratio Service
         if not claude_client:
-            logger.warning("Claude not available, returning Gemini output")
-            final_response = {
-                "status": "success",
-                "data": {
-                    "geminiAnalysis": gemini_output,
-                    "sources": [{"name": "PDF Document", "url": pdf_url, "category": "Company data"}]
-                }
+            logger.error("Claude client not available for ratio calculation")
+            return {
+                "status": "error",
+                "message": "Claude client not available for financial analysis"
             }
-        else:
-            try:
-                loop = asyncio.get_running_loop()
-                claude_response_raw = await loop.run_in_executor(
-                    None,
-                    query_claude, 
-                    company_name, 
-                    gemini_output
-                )
-                
-                # Strip markdown fences from Claude's response
-                if claude_response_raw.strip().startswith("```json"):
-                    claude_response = claude_response_raw.strip()[7:-3].strip()
-                elif claude_response_raw.strip().startswith("```"):
-                    claude_response = claude_response_raw.strip()[3:-3].strip()
-                else:
-                    claude_response = claude_response_raw.strip()
-
-                # Validate Claude response as JSON
-                try:
-                    json.loads(claude_response)
-                    logger.info("Claude returned valid JSON response")
-                except json.JSONDecodeError as validate_err:
-                    logger.error(f"Claude returned invalid JSON: {validate_err}")
-                    logger.error(f"Claude response sample: {claude_response[:500]}")
-                    claude_response = json.dumps({"status": "error", "message": f"Claude returned invalid JSON: {validate_err}"}, indent=2)
-            except Exception as e_claude:
-                logger.error(f"Claude synthesis error: {e_claude}")
-                claude_response = json.dumps({"status": "error", "message": f"Claude synthesis error: {e_claude}"}, indent=2)
         
-        # Prepare sources
-        source_list_json = [{"name": "PDF Document", "url": pdf_url, "category": "Company data"}]
-
-        # Determine final response based on success/failure of steps
-        if claude_client and not claude_response.startswith("Error:") and not claude_response.startswith('{"status": "error"'):
-            # Claude returns mixed format (JSON + text), so handle as text response
-            final_response = {
-                "status": "success",
-                "data": {
-                    "claudeAnalysis": claude_response,
-                    "geminiRawData": gemini_output,
-                    "sources": source_list_json
-                }
-            }
-        else:
-            # Claude not available or failed, return Gemini output
-            if claude_response.startswith('{"status": "error"'):
-                # Claude returned an error, parse it
-                try:
-                    claude_error = json.loads(claude_response)
-                    final_response = {
-                        "status": "error",
-                        "message": f"Claude analysis failed: {claude_error.get('message', 'Unknown error')}",
-                        "details": claude_response,
-                        "gemini_output": gemini_output,
-                        "sources": source_list_json
-                    }
-                except json.JSONDecodeError:
-                    final_response = {
-                        "status": "error",
-                        "message": "Claude analysis failed with parsing error",
-                        "details": claude_response[:500] + "..." if len(claude_response) > 500 else claude_response,
-                        "gemini_output": gemini_output,
-                        "sources": source_list_json
-                    }
-            else:
-                # Claude not available, return Gemini output
-                final_response = {
-                    "status": "success",
-                    "data": {
-                        "geminiAnalysis": gemini_output,
-                        "sources": source_list_json
-                    }
-                }
-        
-        # Log final response in clean ASCII format
+        logger.info("Step 3: Calculating financial ratios with Claude...")
         try:
-            final_response_str = json.dumps(final_response, indent=2, ensure_ascii=True)
-            logger.info("=== FINAL OUTPUT ===")
-            logger.info(final_response_str)
-            logger.info("=== END FINAL OUTPUT ===")
-        except Exception:
-            logger.warning("Could not log final response in ASCII format")
+            claude_ratio_output = await query_claude_for_ratios(
+                claude_client, 
+                gemini_output, 
+                company_name, 
+                annual_rent
+            )
             
-        return final_response
+            # Error handling for ratio calculation
+            if claude_ratio_output.startswith("Error"):
+                logger.error("Claude ratio calculation failed")
+                return {
+                    "status": "error",
+                    "message": "Financial ratio calculation failed",
+                    "details": claude_ratio_output
+                }
+                
+        except Exception as e_ratio:
+            logger.error(f"Claude ratio calculation error: {e_ratio}")
+            return {
+                "status": "error",
+                "message": f"Ratio calculation error: {str(e_ratio)}"
+            }
+        
+        # STEP 4: Final financial analysis with Claude Analysis Service  
+        logger.info("Step 4: Generating final financial analysis...")
+        try:
+            loop = asyncio.get_running_loop()
+            final_analysis = await loop.run_in_executor(
+                None,
+                query_claude,
+                company_name,
+                claude_ratio_output,
+                annual_rent
+            )
+            
+            # Error handling for final analysis
+            if final_analysis.startswith("Error") or '"status": "error"' in final_analysis:
+                logger.error("Claude final analysis failed")
+                return {
+                    "status": "error",
+                    "message": "Final financial analysis failed",
+                    "details": final_analysis
+                }
+            
+            # Strip markdown fences if present
+            if final_analysis.strip().startswith("```json"):
+                final_analysis = final_analysis.strip()[7:-3].strip()
+            elif final_analysis.strip().startswith("```"):
+                final_analysis = final_analysis.strip()[3:-3].strip()
+            else:
+                final_analysis = final_analysis.strip()
+
+            # Validate final response as JSON
+            try:
+                json.loads(final_analysis)
+                logger.info("Claude returned valid JSON response for final analysis")
+            except json.JSONDecodeError as validate_err:
+                logger.error(f"Claude returned invalid JSON: {validate_err}")
+                logger.error(f"Claude response sample: {final_analysis[:500]}")
+                return {
+                    "status": "error",
+                    "message": f"Claude returned invalid JSON: {validate_err}"
+                }
+            
+            # Return ONLY the final Claude analysis (as per requirement)
+            logger.info("=== FINAL OUTPUT ===")
+            logger.info(final_analysis)
+            logger.info("=== END FINAL OUTPUT ===")
+            
+            # Parse and return the final analysis JSON directly
+            return json.loads(final_analysis)
+            
+        except Exception as e_analysis:
+            logger.error(f"Claude final analysis error: {e_analysis}")
+            return {
+                "status": "error",
+                "message": f"Final analysis error: {str(e_analysis)}"
+            }
 
     except Exception as e:
         logger.error(f"Critical error in run_analysis: {str(e)}", exc_info=True)

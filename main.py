@@ -37,6 +37,7 @@ app.add_middleware(
 class QueryRequest(BaseModel):
     pdfUrl: str
     companyName: str
+    annualRent: str
 
 # Response model is handled dynamically by the run_analysis function
 
@@ -51,7 +52,8 @@ async def get_financial_insights(request: QueryRequest):
         # Note: run_analysis now handles uploaded PDF analysis instead of document processing
         analysis_result = await run_analysis(
             company_name=request.companyName,
-            pdf_url=request.pdfUrl
+            pdf_url=request.pdfUrl,
+            annual_rent=request.annualRent
         )
 
         # Calculate processing time
