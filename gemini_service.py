@@ -208,6 +208,8 @@ Instructions strictes à respecter
         
         logger.info("Starting Gemini analysis with comprehensive ratio calculation...")
         
+        logger.info("Starting Gemini analysis with comprehensive ratio calculation...")
+        
         loop = asyncio.get_running_loop()
         generate_func = functools.partial(
             client.models.generate_content,

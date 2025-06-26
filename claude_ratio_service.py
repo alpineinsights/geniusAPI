@@ -1,10 +1,10 @@
 import time
 import json
-from anthropic import AsyncAnthropic
+from anthropic import Anthropic
 from logger import logger
 
 
-def query_claude_for_ratios(client: AsyncAnthropic, gemini_output: str, company_name: str, annual_rent: str) -> str:
+def query_claude_for_ratios(client: Anthropic, gemini_output: str, company_name: str, annual_rent: str) -> str:
     """Query Claude 4 for financial ratio calculation from Gemini extracted data"""
     try:
         start_time = time.time()
