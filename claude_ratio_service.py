@@ -257,14 +257,18 @@ Si certains éléments des formules ne sont pas exactement les mêmes, prenez le
 
 Si un ratio n'apparaît pas dans vos calculs, vous DEVEZ l'ajouter avec une valeur ou "Non calculable" 
 
-Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratios) + Rentabilité (5 ratios) + Évolution (4 ratios) + Trésorerie & Financement (3 ratios) + Délais de Paiement (2 ratios) = 41 ratios MINIMUM"""
+Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratios) + Rentabilité (5 ratios) + Évolution (4 ratios) + Trésorerie & Financement (3 ratios) + Délais de Paiement (2 ratios) = 41 ratios MINIMUM
+
+INSTRUCTIONS CRITIQUES POUR LE FORMAT DE SORTIE
+
+1. Votre réponse DOIT être un JSON valide UNIQUEMENT
+2. Aucun texte avant ou après le JSON
+3. Aucun markdown, aucune explication, SEULEMENT le JSON
+4. Commencez votre réponse directement par {{ et terminez par }}
+
+RÈGLE ABSOLUE : Retournez UNIQUEMENT le JSON des ratios calculés, rien d'autre"""
 
         logger.info("Starting Claude ratio calculation...")
-        
-        # Debug the API call parameters
-        logger.info(f"Making Claude API call with model: claude-sonnet-4-20250514")
-        logger.info(f"Max tokens: 4096, Temperature: 0.1")
-        logger.info(f"Prompt length: {len(prompt)} characters")
         
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
@@ -278,8 +282,6 @@ Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratio
             ]
         )
         
-        logger.info(f"Claude API call completed. Response object type: {type(response)}")
-        
         total_time = time.time() - start_time
         logger.info(f"Claude ratio calculation completed in {total_time:.2f}s")
         
@@ -288,12 +290,6 @@ Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratio
             return "Error: Received an empty response from Claude."
         
         response_text = response.content[0].text if response.content else ""
-        
-        # Debug the response object structure
-        logger.info(f"Claude response object: content length = {len(response.content) if response.content else 0}")
-        if response.content:
-            logger.info(f"First content item type: {type(response.content[0])}")
-            logger.info(f"First content text length: {len(response.content[0].text) if hasattr(response.content[0], 'text') else 'No text attribute'}")
         
         # Validate JSON structure
         try:

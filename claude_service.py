@@ -214,10 +214,7 @@ IMPORTANT : Commencez votre réponse directement par {{ et terminez par }}. Aucu
 
         logger.info(f"Calling Claude for final financial analysis for {company_name}")
 
-        # Debug the API call parameters
-        logger.info(f"Making Claude API call with model: claude-sonnet-4-20250514")
-        logger.info(f"Max tokens: 4096, Temperature: 0.2")
-        logger.info(f"Prompt length: {len(prompt)} characters")
+        logger.info(f"Making Claude API call for final analysis")
 
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
@@ -229,19 +226,11 @@ IMPORTANT : Commencez votre réponse directement par {{ et terminez par }}. Aucu
             }]
         )
 
-        logger.info(f"Claude API call completed. Response object type: {type(response)}")
-
         if not response or not response.content:
             logger.error("Claude returned empty response")
             return json.dumps({"status": "error", "message": "Empty response from Claude"}, indent=2)
         
         response_text = response.content[0].text
-        
-        # Debug the response object structure
-        logger.info(f"Claude response object: content length = {len(response.content) if response.content else 0}")
-        if response.content:
-            logger.info(f"First content item type: {type(response.content[0])}")
-            logger.info(f"First content text length: {len(response.content[0].text) if hasattr(response.content[0], 'text') else 'No text attribute'}")
         
         total_time = time.time() - start_time
         logger.info(f"Claude analysis completed in {total_time:.2f}s")
@@ -250,13 +239,6 @@ IMPORTANT : Commencez votre réponse directement par {{ et terminez par }}. Aucu
         try:
             parsed_response = json.loads(response_text)
             logger.info("Claude returned valid JSON for financial analysis")
-            
-            # Extensively log the final JSON output that will be sent to webhook
-            formatted_output = json.dumps(parsed_response, ensure_ascii=False, indent=2)
-            logger.info("=== FINAL CLAUDE OUTPUT (JSON FORMAT) ===")
-            logger.info(f"Full JSON response being sent to webhook:\n{formatted_output}")
-            logger.info("=== END FINAL CLAUDE OUTPUT ===")
-            
             return json.dumps(parsed_response, ensure_ascii=False, indent=2)
         except json.JSONDecodeError as e:
             logger.error(f"Claude returned invalid JSON: {e}")
@@ -283,13 +265,6 @@ IMPORTANT : Commencez votre réponse directement par {{ et terminez par }}. Aucu
                     json_part = text[start_idx:end_idx + 1]
                     parsed_json = json.loads(json_part)
                     logger.info("Successfully extracted JSON from Claude response")
-                    
-                    # Extensively log the extracted final JSON output
-                    formatted_output = json.dumps(parsed_json, ensure_ascii=False, indent=2)
-                    logger.info("=== FINAL CLAUDE OUTPUT (EXTRACTED JSON FORMAT) ===")
-                    logger.info(f"Full JSON response being sent to webhook:\n{formatted_output}")
-                    logger.info("=== END FINAL CLAUDE OUTPUT ===")
-                    
                     return json.dumps(parsed_json, ensure_ascii=False, indent=2)
                 except json.JSONDecodeError as extract_error:
                     logger.error(f"Could not extract valid JSON from Claude response: {extract_error}")
