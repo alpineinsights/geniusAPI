@@ -203,7 +203,8 @@ Instructions strictes à respecter
             thinking_config=types.ThinkingConfig(
                 thinking_budget=8000,
             ),
-            response_mime_type="application/json"
+            response_mime_type="application/json",
+            max_output_tokens=8192
         )
         
         logger.info("Starting Gemini financial data extraction from PDF...")
