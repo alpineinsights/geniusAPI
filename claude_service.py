@@ -210,7 +210,18 @@ Format de l'analyse : Texte de 800 mots avec phrases courtes, données chiffrée
 
 Conclusion : Recommandation claire avec niveau de risque explicite
 
-IMPORTANT : Commencez votre réponse directement par {{ et terminez par }}. Aucun texte explicatif."""
+IMPORTANT : Commencez votre réponse directement par {{ et terminez par }}. Aucun texte explicatif.
+
+EXEMPLE DE STRUCTURE JSON ATTENDUE (simplifié):
+{{
+  "companyName": "...",
+  "annualRent": "...", 
+  "ratios": {{ ... }},
+  "chiffres_cles": {{ ... }},
+  "analyse_financiere": "Votre analyse de 800 mots ici..."
+}}
+
+ATTENTION: Le champ "analyse_financiere" doit être le DERNIER champ et contenir tout le texte d'analyse en une seule chaîne de caractères."""
 
         logger.info(f"Calling Claude for final financial analysis for {company_name}")
 
@@ -238,8 +249,29 @@ IMPORTANT : Commencez votre réponse directement par {{ et terminez par }}. Aucu
         # Try to parse and validate the JSON response
         try:
             parsed_response = json.loads(response_text)
+            
+            # Validate that required fields are present
+            required_fields = ["companyName", "ratios", "chiffres_cles", "analyse_financiere"]
+            missing_fields = [field for field in required_fields if field not in parsed_response]
+            
+            if missing_fields:
+                logger.error(f"Claude response missing required fields: {missing_fields}")
+                logger.debug(f"Available fields: {list(parsed_response.keys())}")
+                logger.debug(f"Raw response (first 1000 chars): {response_text[:1000]}")
+                
+                # Try to fix common issues
+                if "analyse_financiere" not in parsed_response and "analyse_financiere" in response_text:
+                    logger.info("Attempting to fix malformed JSON by extracting analyse_financiere")
+                    # This is a fallback - the JSON structure is broken
+                    return json.dumps({
+                        "status": "error", 
+                        "message": "Claude returned incomplete JSON structure",
+                        "debug_info": f"Missing fields: {missing_fields}"
+                    }, indent=2)
+            
             logger.info("Claude returned valid JSON for financial analysis")
             return json.dumps(parsed_response, ensure_ascii=False, indent=2)
+            
         except json.JSONDecodeError as e:
             logger.error(f"Claude returned invalid JSON: {e}")
             logger.error(f"Response text length: {len(response_text)}")
