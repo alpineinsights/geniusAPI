@@ -48,7 +48,7 @@ async def run_analysis(company_name: str, pdf_url: str, annual_rent: str):
         
         logger.info("Step 3: Calculating financial ratios with Claude...")
         try:
-            claude_ratio_output = await query_claude_for_ratios(
+            claude_ratio_output = query_claude_for_ratios(
                 claude_client, 
                 gemini_output, 
                 company_name, 
@@ -74,10 +74,7 @@ async def run_analysis(company_name: str, pdf_url: str, annual_rent: str):
         # STEP 4: Final financial analysis with Claude Analysis Service  
         logger.info("Step 4: Generating final financial analysis...")
         try:
-            loop = asyncio.get_running_loop()
-            final_analysis = await loop.run_in_executor(
-                None,
-                query_claude,
+            final_analysis = query_claude(
                 company_name,
                 claude_ratio_output,
                 annual_rent

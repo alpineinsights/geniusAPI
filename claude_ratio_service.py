@@ -1,12 +1,10 @@
 import time
-import asyncio
-import functools
 import json
 from anthropic import AsyncAnthropic
 from logger import logger
 
 
-async def query_claude_for_ratios(client: AsyncAnthropic, gemini_output: str, company_name: str, annual_rent: str) -> str:
+def query_claude_for_ratios(client: AsyncAnthropic, gemini_output: str, company_name: str, annual_rent: str) -> str:
     """Query Claude 4 for financial ratio calculation from Gemini extracted data"""
     try:
         start_time = time.time()
@@ -263,9 +261,7 @@ Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratio
 
         logger.info("Starting Claude ratio calculation...")
         
-        loop = asyncio.get_running_loop()
-        create_func = functools.partial(
-            client.messages.create,
+        response = client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=4096,
             temperature=0.1,
@@ -276,8 +272,6 @@ Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratio
                 }
             ]
         )
-        
-        response = await loop.run_in_executor(None, create_func)
         
         total_time = time.time() - start_time
         logger.info(f"Claude ratio calculation completed in {total_time:.2f}s")
