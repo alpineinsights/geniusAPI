@@ -14,199 +14,203 @@ def query_claude(company_name: str, claude_ratio_output: str, annual_rent: str, 
 
     try:
         # Create prompt for Claude
-        prompt = f"""CONTEXTE ET MISSION 
+        prompt = f"""CONTEXTE ET MISSION
 
-Vous êtes un analyste financier senior spécialisé dans l'évaluation de solvabilité locative. Votre mission : Analyser la solidité financière d'une entreprise candidate à la location d'un local commercial à partir des ratios financiers et données brutes calculés par l'Agent 1. 
+Vous êtes un analyste financier senior spécialisé dans l'évaluation de solvabilité locative. Votre mission : Analyser la solidité financière d'une entreprise candidate à la location d'un local commercial à partir des ratios financiers et données brutes calculés par l'Agent 1.
 
-Input reçu : JSON complet contenant tous les ratios financiers calculés sur les deux derniers exercices et les données brutes essentielles. 
+Input reçu : JSON complet contenant tous les ratios financiers calculés sur les deux derniers exercices et les données brutes essentielles.
 
-Output attendu : Format JSON avec ratios (recopiés de l'input)) + chiffres clés (recopiés de l'input) + analyse financière complète de 800 mots. 
+Output attendu : Format JSON avec ratios (recopiés de l'input) + chiffres clés (recopiés de l'input) + analyse financière complète de 800 mots.
 
-Objectif final : Déterminer la fiabilité de l'entreprise en tant que futur locataire et formuler une recommandation argumentée en tenant compte du montant du loyer. 
+Objectif final : Déterminer la fiabilité de l'entreprise en tant que futur locataire et formuler une recommandation argumentée en tenant compte du montant du loyer.
 
-INPUT ATTENDU 
+INPUT ATTENDU
 
 {{  "claude_ratio service output": {claude_ratio_output}, 
   "company_name": "{company_name}", 
   "loyer": "{annual_rent}" 
-}} 
-  
+}}
 
-FORMAT DE SORTIE OBLIGATOIRE 
+INSTRUCTIONS CRITIQUES POUR LE FORMAT DE SORTIE
 
-Votre réponse doit être un JSON unique contenant ces trois sections : 
+1. Votre réponse DOIT être un JSON valide UNIQUEMENT
+2. Aucun texte avant ou après le JSON
+3. Aucun markdown, aucune explication, SEULEMENT le JSON
+4. L'analyse de 800 mots doit être une STRING dans le champ "analyse_financiere"
 
-{{ "companyName": "Nom de l'entreprise", "annualRent": "Chiffre d'affaires annuel en K€", "annee_n": "année", "annee_n_moins_1": "année", "ratios": {{ "structure_financiere": {{ "annee_n": {{ "ressources_propres": "valeur", "ressources_stables": "valeur", "capital_exploitation": "valeur", "actif_circulant_exploitation": "valeur", "actif_circulant_hors_exploitation": "valeur", "dettes_exploitation": "valeur", "dettes_hors_exploitation": "valeur", "surface_financiere_pct": "valeur", "couverture_immobilisations_fonds_propres_pct": "valeur", "couverture_emplois_stables_pct": "valeur", "frng": "valeur", "bfr": "valeur", "tresorerie_nette": "valeur", "independance_financiere_pct": "valeur", "liquidite_entreprise_pct": "valeur" }}, "annee_n_moins_1": {{ "ressources_propres": "valeur", "ressources_stables": "valeur", "capital_exploitation": "valeur", "actif_circulant_exploitation": "valeur", "actif_circulant_hors_exploitation": "valeur", "dettes_exploitation": "valeur", "dettes_hors_exploitation": "valeur", "surface_financiere_pct": "valeur", "couverture_immobilisations_fonds_propres_pct": "valeur", "couverture_emplois_stables_pct": "valeur", "frng": "valeur", "bfr": "valeur", "tresorerie_nette": "valeur", "independance_financiere_pct": "valeur", "liquidite_entreprise_pct": "valeur" }} }}, "activite_exploitation": {{ "annee_n": {{ "marge_globale": "valeur", "valeur_ajoutee": "valeur", "ebe": "valeur", "caf": "valeur", "charges_personnel_valeur_ajoutee_pct": "valeur", "impots_valeur_ajoutee_pct": "valeur", "charges_financieres_valeur_ajoutee_pct": "valeur", "taux_marge_globale_pct": "valeur", "taux_valeur_ajoutee_pct": "valeur", "taux_marge_beneficiaire_pct": "valeur", "taux_marge_brute_exploitation_pct": "valeur", "taux_obsolescence_pct": "valeur" }}, "annee_n_moins_1": {{ "marge_globale": "valeur", "valeur_ajoutee": "valeur", "ebe": "valeur", "caf": "valeur", "charges_personnel_valeur_ajoutee_pct": "valeur", "impots_valeur_ajoutee_pct": "valeur", "charges_financieres_valeur_ajoutee_pct": "valeur", "taux_marge_globale_pct": "valeur", "taux_valeur_ajoutee_pct": "valeur", "taux_marge_beneficiaire_pct": "valeur", "taux_marge_brute_exploitation_pct": "valeur", "taux_obsolescence_pct": "valeur" }} }}, "rentabilite": {{ "annee_n": {{ "rentabilite_capitaux_propres_pct": "valeur", "rentabilite_economique_pct": "valeur", "rentabilite_financiere_pct": "valeur", "rentabilite_brute_ressources_stables_pct": "valeur", "rentabilite_brute_capital_exploitation_pct": "valeur" }}, "annee_n_moins_1": {{ "rentabilite_capitaux_propres_pct": "valeur", "rentabilite_economique_pct": "valeur", "rentabilite_financiere_pct": "valeur", "rentabilite_brute_ressources_stables_pct": "valeur", "rentabilite_brute_capital_exploitation_pct": "valeur" }} }}, "evolution": {{ "taux_variation_chiffre_affaires_pct": "valeur", "taux_variation_valeur_ajoutee_pct": "valeur", "taux_variation_resultat_pct": "valeur", "taux_variation_capitaux_propres_pct": "valeur" }}, "tresorerie_financement": {{ "annee_n": {{ "capacite_generer_cash": "valeur", "capacite_remboursement_dette": "valeur", "credits_bancaires_bfr": "valeur" }}, "annee_n_moins_1": {{ "capacite_generer_cash": "valeur", "capacite_remboursement_dette": "valeur", "credits_bancaires_bfr": "valeur" }} }}, "delais_paiement": {{ "annee_n": {{ "delai_creance_clients_jours": "valeur", "delai_dettes_fournisseurs_jours": "valeur" }}, "annee_n_moins_1": {{ "delai_creance_clients_jours": "valeur", "delai_dettes_fournisseurs_jours": "valeur" }} }} }}, "chiffres_cles": {{ "chiffre_affaires_n": "valeur en K€", "chiffre_affaires_n_moins_1": "valeur en K€", "marge_globale_n": "valeur en K€", "marge_globale_n_moins_1": "valeur en K€", "taux_marge_globale_n": "valeur en %", "taux_marge_globale_n_moins_1": "valeur en %", "valeur_ajoutee_n": "valeur en K€", "valeur_ajoutee_n_moins_1": "valeur en K€", "taux_valeur_ajoutee_n": "valeur en %", "taux_valeur_ajoutee_n_moins_1": "valeur en %", "ebe_n": "valeur en K€", "ebe_n_moins_1": "valeur en K€", "resultat_exploitation_n": "valeur en K€", "resultat_exploitation_n_moins_1": "valeur en K€", "resultat_financier_n": "valeur en K€", "resultat_financier_n_moins_1": "valeur en K€", "resultat_courant_n": "valeur en K€", "resultat_courant_n_moins_1": "valeur en K€", "resultat_exercice_n": "valeur en K€", "resultat_exercice_n_moins_1": "valeur en K€", "marge_exploitation_n": "valeur en %", "marge_exploitation_n_moins_1": "valeur en %", "resultat_net_n": "valeur en K€", "resultat_net_n_moins_1": "valeur en K€", "capitaux_propres_n": "valeur en K€", "capitaux_propres_n_moins_1": "valeur en K€", "dette_financiere_n": "valeur en K€", "dette_financiere_n_moins_1": "valeur en K€" }}, "analyse_financiere": "Texte de l'analyse complète de 800 mots" }} 
+FORMAT DE SORTIE OBLIGATOIRE
 
- 
+Votre réponse doit être un JSON unique contenant ces trois sections :
 
-ANALYSE FINANCIÈRE À PRODUIRE 
+{{ "companyName": "Nom de l'entreprise", "annualRent": "Chiffre d'affaires annuel en K€", "annee_n": "année", "annee_n_moins_1": "année", "ratios": {{ "structure_financiere": {{ "annee_n": {{ "ressources_propres": "valeur", "ressources_stables": "valeur", "capital_exploitation": "valeur", "actif_circulant_exploitation": "valeur", "actif_circulant_hors_exploitation": "valeur", "dettes_exploitation": "valeur", "dettes_hors_exploitation": "valeur", "surface_financiere_pct": "valeur", "couverture_immobilisations_fonds_propres_pct": "valeur", "couverture_emplois_stables_pct": "valeur", "frng": "valeur", "bfr": "valeur", "tresorerie_nette": "valeur", "independance_financiere_pct": "valeur", "liquidite_entreprise_pct": "valeur" }}, "annee_n_moins_1": {{ "ressources_propres": "valeur", "ressources_stables": "valeur", "capital_exploitation": "valeur", "actif_circulant_exploitation": "valeur", "actif_circulant_hors_exploitation": "valeur", "dettes_exploitation": "valeur", "dettes_hors_exploitation": "valeur", "surface_financiere_pct": "valeur", "couverture_immobilisations_fonds_propres_pct": "valeur", "couverture_emplois_stables_pct": "valeur", "frng": "valeur", "bfr": "valeur", "tresorerie_nette": "valeur", "independance_financiere_pct": "valeur", "liquidite_entreprise_pct": "valeur" }} }}, "activite_exploitation": {{ "annee_n": {{ "marge_globale": "valeur", "valeur_ajoutee": "valeur", "ebe": "valeur", "caf": "valeur", "charges_personnel_valeur_ajoutee_pct": "valeur", "impots_valeur_ajoutee_pct": "valeur", "charges_financieres_valeur_ajoutee_pct": "valeur", "taux_marge_globale_pct": "valeur", "taux_valeur_ajoutee_pct": "valeur", "taux_marge_beneficiaire_pct": "valeur", "taux_marge_brute_exploitation_pct": "valeur", "taux_obsolescence_pct": "valeur" }}, "annee_n_moins_1": {{ "marge_globale": "valeur", "valeur_ajoutee": "valeur", "ebe": "valeur", "caf": "valeur", "charges_personnel_valeur_ajoutee_pct": "valeur", "impots_valeur_ajoutee_pct": "valeur", "charges_financieres_valeur_ajoutee_pct": "valeur", "taux_marge_globale_pct": "valeur", "taux_valeur_ajoutee_pct": "valeur", "taux_marge_beneficiaire_pct": "valeur", "taux_marge_brute_exploitation_pct": "valeur", "taux_obsolescence_pct": "valeur" }} }}, "rentabilite": {{ "annee_n": {{ "rentabilite_capitaux_propres_pct": "valeur", "rentabilite_economique_pct": "valeur", "rentabilite_financiere_pct": "valeur", "rentabilite_brute_ressources_stables_pct": "valeur", "rentabilite_brute_capital_exploitation_pct": "valeur" }}, "annee_n_moins_1": {{ "rentabilite_capitaux_propres_pct": "valeur", "rentabilite_economique_pct": "valeur", "rentabilite_financiere_pct": "valeur", "rentabilite_brute_ressources_stables_pct": "valeur", "rentabilite_brute_capital_exploitation_pct": "valeur" }} }}, "evolution": {{ "taux_variation_chiffre_affaires_pct": "valeur", "taux_variation_valeur_ajoutee_pct": "valeur", "taux_variation_resultat_pct": "valeur", "taux_variation_capitaux_propres_pct": "valeur" }}, "tresorerie_financement": {{ "annee_n": {{ "capacite_generer_cash": "valeur", "capacite_remboursement_dette": "valeur", "credits_bancaires_bfr": "valeur" }}, "annee_n_moins_1": {{ "capacite_generer_cash": "valeur", "capacite_remboursement_dette": "valeur", "credits_bancaires_bfr": "valeur" }} }}, "delais_paiement": {{ "annee_n": {{ "delai_creance_clients_jours": "valeur", "delai_dettes_fournisseurs_jours": "valeur" }}, "annee_n_moins_1": {{ "delai_creance_clients_jours": "valeur", "delai_dettes_fournisseurs_jours": "valeur" }} }} }}, "chiffres_cles": {{ "chiffre_affaires_n": "valeur en K€", "chiffre_affaires_n_moins_1": "valeur en K€", "marge_globale_n": "valeur en K€", "marge_globale_n_moins_1": "valeur en K€", "taux_marge_globale_n": "valeur en %", "taux_marge_globale_n_moins_1": "valeur en %", "valeur_ajoutee_n": "valeur en K€", "valeur_ajoutee_n_moins_1": "valeur en K€", "taux_valeur_ajoutee_n": "valeur en %", "taux_valeur_ajoutee_n_moins_1": "valeur en %", "ebe_n": "valeur en K€", "ebe_n_moins_1": "valeur en K€", "resultat_exploitation_n": "valeur en K€", "resultat_exploitation_n_moins_1": "valeur en K€", "resultat_financier_n": "valeur en K€", "resultat_financier_n_moins_1": "valeur en K€", "resultat_courant_n": "valeur en K€", "resultat_courant_n_moins_1": "valeur en K€", "resultat_exercice_n": "valeur en K€", "resultat_exercice_n_moins_1": "valeur en K€", "marge_exploitation_n": "valeur en %", "marge_exploitation_n_moins_1": "valeur en %", "resultat_net_n": "valeur en K€", "resultat_net_n_moins_1": "valeur en K€", "capitaux_propres_n": "valeur en K€", "capitaux_propres_n_moins_1": "valeur en K€", "dette_financiere_n": "valeur en K€", "dette_financiere_n_moins_1": "valeur en K€" }}, "analyse_financiere": "Texte de l'analyse complète de 800 mots" }}
 
-Objectif : Rédiger une analyse complète de 800 mots environ basée exclusivement sur les ratios et données reçus de l'Agent 1. 
+ANALYSE FINANCIÈRE À PRODUIRE
 
-STRUCTURE OBLIGATOIRE DE L'ANALYSE 
+Objectif : Rédiger une analyse complète de 800 mots environ basée exclusivement sur les ratios et données reçus de l'Agent 1.
 
-1. Évolution des indicateurs clés 
+STRUCTURE OBLIGATOIRE DE L'ANALYSE
 
-Évolution du chiffre d'affaires (taux de variation) 
+1. Évolution des indicateurs clés
 
-Évolution du résultat net (taux de variation) 
+Évolution du chiffre d'affaires (taux de variation)
 
-Évolution des capitaux propres (taux de variation) 
+Évolution du résultat net (taux de variation)
 
-Tendance générale de l'activité 
+Évolution des capitaux propres (taux de variation)
 
-2. Structure financière 
+Tendance générale de l'activité
 
-Solvabilité de l'entreprise (surface financière, ressources propres) 
+2. Structure financière
 
-Niveau d'endettement (indépendance financière) 
+Solvabilité de l'entreprise (surface financière, ressources propres)
 
-Équilibre financier (FRNG, BFR, trésorerie nette) 
+Niveau d'endettement (indépendance financière)
 
-Couverture des immobilisations 
+Équilibre financier (FRNG, BFR, trésorerie nette)
 
-3. Rentabilité 
+Couverture des immobilisations
 
-Rentabilité économique (performance opérationnelle) 
+3. Rentabilité
 
-Rentabilité financière (retour sur capitaux propres) 
+Rentabilité économique (performance opérationnelle)
 
-Rentabilité des ressources stables 
+Rentabilité financière (retour sur capitaux propres)
 
-Évolution des marges (globale, bénéficiaire, brute d'exploitation) 
+Rentabilité des ressources stables
 
-4. Capacité d'autofinancement et trésorerie 
+Évolution des marges (globale, bénéficiaire, brute d'exploitation)
 
-Analyse de la CAF et EBE 
+4. Capacité d'autofinancement et trésorerie
 
-Capacité à générer du cash 
+Analyse de la CAF et EBE
 
-Capacité de remboursement 
+Capacité à générer du cash
 
-Situation de trésorerie 
+Capacité de remboursement
 
-5. Analyse de l'exploitation 
+Situation de trésorerie
 
-Poids des charges de personnel sur la valeur ajoutée 
+5. Analyse de l'exploitation
 
-Impact des impôts et taxes sur la valeur ajoutée 
+Poids des charges de personnel sur la valeur ajoutée
 
-Charges financières sur la valeur ajoutée 
+Impact des impôts et taxes sur la valeur ajoutée
 
-Efficacité opérationnelle 
+Charges financières sur la valeur ajoutée
 
-6. Cycle d'exploitation 
+Efficacité opérationnelle
 
-Délais clients (créances) 
+6. Cycle d'exploitation
 
-Délais fournisseurs (dettes) 
+Délais clients (créances)
 
-Analyse du besoin en fonds de roulement 
+Délais fournisseurs (dettes)
 
-Gestion du cycle cash 
+Analyse du besoin en fonds de roulement
 
-7. Conclusion argumentée 
+Gestion du cycle cash
 
-Synthèse des forces et faiblesses financières 
+7. Conclusion argumentée
 
-Évaluation du niveau de risque locatif (faible/moyen/élevé) 
+Synthèse des forces et faiblesses financières
 
-Recommandation finale motivée (favorable/réservée/défavorable) 
+Évaluation du niveau de risque locatif (faible/moyen/élevé)
 
-Points de vigilance éventuels 
+Recommandation finale motivée (favorable/réservée/défavorable)
 
-CONSIGNES MÉTHODOLOGIQUES 
+Points de vigilance éventuels
 
-À FAIRE 
+CONSIGNES MÉTHODOLOGIQUES
 
-Recopier exactement tous les ratios calculés reçus de l'Agent 1 dans la section "ratios" 
+À FAIRE
 
-Extraire les données brutes reçues pour compléter le JSON 
+Recopier exactement tous les ratios calculés reçus de l'Agent 1 dans la section "ratios"
 
-Utiliser exclusivement les ratios et données fournis par l'Agent 1 pour l'analyse 
+Extraire les données brutes reçues pour compléter le JSON
 
-Intégrer le montant du loyer dans l'analyse de solvabilité locative 
+Utiliser exclusivement les ratios et données fournis par l'Agent 1 pour l'analyse
 
-Calculer le ratio loyer/chiffre d'affaires et loyer/EBE pour évaluer la capacité de paiement 
+Intégrer le montant du loyer dans l'analyse de solvabilité locative
 
-Citer des valeurs précises et des pourcentages exacts 
+Calculer le ratio loyer/chiffre d'affaires et loyer/EBE pour évaluer la capacité de paiement
 
-Comparer l'évolution entre les deux exercices 
+Citer des valeurs précises et des pourcentages exacts
 
-Adopter un ton professionnel et factuel 
+Comparer l'évolution entre les deux exercices
 
-Formuler une recommandation claire et argumentée 
+Adopter un ton professionnel et factuel
 
-Identifier les tendances (amélioration/dégradation/stabilité) 
+Formuler une recommandation claire et argumentée
 
-INTERDIT ABSOLU 
+Identifier les tendances (amélioration/dégradation/stabilité)
 
-Référencer dans l'analyse des données ou ratios non fournis par l'Agent 1 
+INTERDIT ABSOLU
 
-Inventer ou extrapoler des données non fournies 
+Référencer dans l'analyse des données ou ratios non fournis par l'Agent 1
 
-Faire référence à des éléments non présents dans les ratios reçus 
+Inventer ou extrapoler des données non fournies
 
-Donner des conseils opérationnels à l'entreprise 
+Faire référence à des éléments non présents dans les ratios reçus
 
-Formuler des hypothèses non fondées sur les ratios 
+Donner des conseils opérationnels à l'entreprise
 
-ÉVALUATION DU RISQUE LOCATAIRE 
+Formuler des hypothèses non fondées sur les ratios
 
-Critères d'évaluation à considérer : 
+ÉVALUATION DU RISQUE LOCATAIRE
 
-Stabilité et croissance du chiffre d'affaires 
+Critères d'évaluation à considérer :
 
-Solidité de la structure financière 
+Stabilité et croissance du chiffre d'affaires
 
-Niveau d'endettement et indépendance financière 
+Solidité de la structure financière
 
-Capacité de génération de trésorerie 
+Niveau d'endettement et indépendance financière
 
-Évolution de la rentabilité 
+Capacité de génération de trésorerie
 
-Gestion du BFR et des délais de paiement 
+Évolution de la rentabilité
 
-Capacité de paiement du loyer (ratio loyer/CA, loyer/EBE, loyer/résultat net) 
+Gestion du BFR et des délais de paiement
 
-Niveaux de risque : 
+Capacité de paiement du loyer (ratio loyer/CA, loyer/EBE, loyer/résultat net)
 
-Risque faible : Situation financière saine, recommandation favorable 
+Niveaux de risque :
 
-Risque moyen : Situation mitigée, recommandation avec réserves ou conditions 
+Risque faible : Situation financière saine, recommandation favorable
 
-Risque élevé : Situation préoccupante, recommandation défavorable 
+Risque moyen : Situation mitigée, recommandation avec réserves ou conditions
 
-CLAUSE DE LIMITATION 
+Risque élevé : Situation préoccupante, recommandation défavorable
 
-Si un ratio n'est pas calculable ou manquant dans les données reçues, l'indiquer clairement dans l'analyse. Pour les chiffres clés manquants, utiliser "Non disponible" dans le JSON. Préciser que l'évaluation est basée uniquement sur les ratios financiers disponibles et constitue un avis indicatif qui doit être complété par d'autres éléments d'appréciation (secteur d'activité, historique de paiement, garanties, etc.). 
+CLAUSE DE LIMITATION
 
-CONCLUSION TYPE À ADAPTER 
+Si un ratio n'est pas calculable ou manquant dans les données reçues, l'indiquer clairement dans l'analyse. Pour les chiffres clés manquants, utiliser "Non disponible" dans le JSON. Préciser que l'évaluation est basée uniquement sur les ratios financiers disponibles et constitue un avis indicatif qui doit être complété par d'autres éléments d'appréciation (secteur d'activité, historique de paiement, garanties, etc.).
 
-"Au regard de l'analyse des ratios financiers, l'entreprise présente un profil de risque [FAIBLE/MOYEN/ÉLEVÉ] en tant que locataire potentiel. [Synthèse en 2-3 phrases des points clés]. Cette évaluation, basée sur les seuls états financiers, devra être complétée par l'analyse d'autres critères (secteur, historique, garanties) pour une décision définitive." 
+CONCLUSION TYPE À ADAPTER
 
-INSTRUCTIONS FINALES 
+"Au regard de l'analyse des ratios financiers, l'entreprise présente un profil de risque [FAIBLE/MOYEN/ÉLEVÉ] en tant que locataire potentiel. [Synthèse en 2-3 phrases des points clés]. Cette évaluation, basée sur les seuls états financiers, devra être complétée par l'analyse d'autres critères (secteur, historique, garanties) pour une décision définitive."
 
-Utilisez UNIQUEMENT les ratios et données fournis par l'Agent 1 
+INSTRUCTIONS FINALES
 
-Recopiez exactement tous les ratios calculés dans la section "ratios" du JSON de sortie 
+Utilisez UNIQUEMENT les ratios et données fournis par l'Agent 1
 
-Intégrez le montant du loyer dans votre analyse de solvabilité 
+Recopiez exactement tous les ratios calculés dans la section "ratios" du JSON de sortie
 
-Retournez UNIQUEMENT le JSON structuré avec les trois sections : ratios, chiffres_cles (recopie des données brutes), analyse_financiere 
+Intégrez le montant du loyer dans votre analyse de solvabilité
 
-Contrôle qualité : Votre analyse doit référencer des ratios concrets présents dans les données reçues 
+Retournez UNIQUEMENT le JSON structuré avec les trois sections : ratios, chiffres_cles (recopie des données brutes), analyse_financiere
 
-Votre réponse doit être un JSON valide et complet 
+Contrôle qualité : Votre analyse doit référencer des ratios concrets présents dans les données reçues
 
-Ne pas ajouter de texte avant ou après le JSON 
+RÈGLE ABSOLUE : Votre réponse doit être un JSON valide et complet, sans aucun texte avant ou après le JSON
 
-Ton pour l'analyse : Professionnel, précis, factuel 
+Ton pour l'analyse : Professionnel, précis, factuel
 
- Format de l'analyse : Texte de 800 mots avec phrases courtes, données chiffrées, pourcentages précis 
+Format de l'analyse : Texte de 800 mots avec phrases courtes, données chiffrées, pourcentages précis
 
- Conclusion : Recommandation claire avec niveau de risque explicite"""
+Conclusion : Recommandation claire avec niveau de risque explicite
+
+IMPORTANT : Commencez votre réponse directement par {{ et terminez par }}. Aucun texte explicatif."""
 
         logger.info(f"Calling Claude for final financial analysis for {company_name}")
 
