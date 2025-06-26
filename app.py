@@ -102,11 +102,11 @@ async def run_analysis(company_name: str, pdf_url: str, annual_rent: str):
             # Validate and parse JSON
             try:
                 result = json.loads(cleaned_response)
-                logger.info("Claude returned valid JSON response for final analysis")
+                logger.info("Analysis completed successfully")
                 return result
             except json.JSONDecodeError as validate_err:
                 logger.error(f"Claude returned invalid JSON: {validate_err}")
-                logger.error(f"Claude response sample: {cleaned_response[:500]}")
+                logger.debug(f"Claude response sample: {cleaned_response[:500]}")
                 return {
                     "status": "error",
                     "message": f"Claude returned invalid JSON: {validate_err}"

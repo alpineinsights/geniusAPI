@@ -236,7 +236,7 @@ Ton pour l'analyse : Professionnel, précis, factuel
             return json.dumps(parsed_response, ensure_ascii=False, indent=2)
         except json.JSONDecodeError as e:
             logger.error(f"Claude returned invalid JSON: {e}")
-            logger.error(f"Raw response (first 1000 chars): {response_text[:1000]}")
+            logger.debug(f"Raw response (first 1000 chars): {response_text[:1000]}")
             
             # Try to extract JSON from the response if it's wrapped in text
             text = response_text.strip()
@@ -267,5 +267,5 @@ Ton pour l'analyse : Professionnel, précis, factuel
         return json.dumps({
             "status": "error",
             "message": f"Error during Claude analysis: {str(e)}",
-            "execution_time": f"{total_time:.2f}s"
+            "processing_time": total_time
         }, indent=2) 

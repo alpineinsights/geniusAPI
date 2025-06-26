@@ -19,7 +19,7 @@ async def download_pdf_from_url(pdf_url: str, timeout_seconds: int = 120, max_re
     Raises:
         Exception: If download fails after all retries
     """
-    logger.info(f"Downloading PDF... (timeout: {timeout_seconds}s, max retries: {max_retries})")
+    logger.info(f"Downloading PDF...")
     start_time = time.time()
     
     # Configure timeout for the session
@@ -29,12 +29,10 @@ async def download_pdf_from_url(pdf_url: str, timeout_seconds: int = 120, max_re
         try:
             if attempt > 0:
                 wait_time = 2 ** attempt  # Exponential backoff: 2, 4, 8 seconds
-                logger.info(f"Retrying download in {wait_time} seconds... (attempt {attempt + 1}/{max_retries + 1})")
+                logger.info(f"Retrying download in {wait_time}s (attempt {attempt + 1}/{max_retries + 1})")
                 await asyncio.sleep(wait_time)
             
             async with aiohttp.ClientSession(timeout=timeout) as session:
-                logger.info(f"Starting download attempt {attempt + 1}/{max_retries + 1}")
-                
                 async with session.get(pdf_url) as response:
                     if response.status == 200:
                         content = await response.read()

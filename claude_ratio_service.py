@@ -286,10 +286,9 @@ Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratio
         try:
             parsed_json = json.loads(response_text)
             logger.info("Claude returned valid JSON for ratio calculations")
-            logger.info(f"Response preview (first 500 chars): {response_text[:500]}")
         except json.JSONDecodeError as e:
             logger.error(f"Claude returned invalid JSON: {e}")
-            logger.error(f"Raw Claude response (first 1000 chars): {response_text[:1000]}")
+            logger.debug(f"Raw Claude response (first 1000 chars): {response_text[:1000]}")
             
             # Try to extract JSON from the response if it's wrapped in text
             text = response_text.strip()

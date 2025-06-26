@@ -208,8 +208,6 @@ Instructions strictes à respecter
         
         logger.info("Starting Gemini analysis with comprehensive ratio calculation...")
         
-        logger.info("Starting Gemini analysis with comprehensive ratio calculation...")
-        
         loop = asyncio.get_running_loop()
         generate_func = functools.partial(
             client.models.generate_content,
@@ -241,44 +239,16 @@ Instructions strictes à respecter
                 
                 if valid_entries > 0:
                     logger.info(f"Gemini returned valid JSON list with {len(parsed_json)} entries")
-                    
-                    # Create a summary of the data for cleaner logging
-                    logger.info("=== GEMINI OUTPUT SUMMARY ===")
-                    logger.info(f"Total entries extracted: {len(parsed_json)}")
-                    
-                    # Group by year for better readability
-                    years = {}
-                    for entry in parsed_json:
-                        if isinstance(entry, dict) and "année" in entry:
-                            year = entry["année"]
-                            if year not in years:
-                                years[year] = []
-                            years[year].append(entry)
-                    
-                    for year in sorted(years.keys(), reverse=True):
-                        logger.info(f"\n--- Année {year} ({len(years[year])} entrées) ---")
-                        for entry in years[year][:10]:  # Show first 10 entries per year
-                            intitule = entry.get("intitulé", "N/A")
-                            valeur = entry.get("valeur")
-                            if valeur is not None:
-                                logger.info(f"  • {intitule}: {valeur}")
-                            else:
-                                logger.info(f"  • {intitule}: null")
-                        
-                        if len(years[year]) > 10:
-                            logger.info(f"  ... et {len(years[year]) - 10} autres entrées")
-                    
-                    logger.info("=== END GEMINI OUTPUT SUMMARY ===")
                 else:
                     logger.warning("Gemini JSON entries don't match expected structure")
-                    logger.info(f"Raw response (first 500 chars): {response.text[:500]}")
+                    logger.debug(f"Raw response (first 500 chars): {response.text[:500]}")
             else:
                 logger.warning("Gemini response is valid JSON but not a list as expected")
-                logger.info(f"Response type: {type(parsed_json)}")
+                logger.debug(f"Response type: {type(parsed_json)}")
             
         except json.JSONDecodeError as e:
             logger.error(f"Gemini returned invalid JSON: {e}")
-            logger.error(f"Raw Gemini response (first 1000 chars): {response.text[:1000]}")
+            logger.debug(f"Raw Gemini response (first 1000 chars): {response.text[:1000]}")
             
             # Try to extract JSON from the response if it's wrapped in text
             text = response.text.strip()

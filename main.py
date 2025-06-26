@@ -45,7 +45,7 @@ class QueryRequest(BaseModel):
 @app.post("/api/insights")
 async def get_financial_insights(request: QueryRequest):
     start_time = time.time()
-    logger.info(f"Received request for company: {request.companyName}, pdfUrl: {request.pdfUrl}")
+    logger.info(f"Received analysis request for: {request.companyName}")
     
     try:
         # Call the consolidated run_analysis function from app.py
@@ -57,7 +57,7 @@ async def get_financial_insights(request: QueryRequest):
 
         # Calculate processing time
         processing_time = time.time() - start_time
-        logger.info(f"Request processed in {processing_time:.2f} seconds")
+        logger.info(f"Request completed in {processing_time:.2f}s")
         
         # Add processing time to the analysis result
         if isinstance(analysis_result, dict):
