@@ -210,6 +210,11 @@ Ton pour l'analyse : Professionnel, précis, factuel
 
         logger.info(f"Calling Claude for final financial analysis for {company_name}")
 
+        # Debug the API call parameters
+        logger.info(f"Making Claude API call with model: claude-sonnet-4-20250514")
+        logger.info(f"Max tokens: 4096, Temperature: 0.2")
+        logger.info(f"Prompt length: {len(prompt)} characters")
+
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=4096,
@@ -220,11 +225,19 @@ Ton pour l'analyse : Professionnel, précis, factuel
             }]
         )
 
+        logger.info(f"Claude API call completed. Response object type: {type(response)}")
+
         if not response or not response.content:
             logger.error("Claude returned empty response")
             return json.dumps({"status": "error", "message": "Empty response from Claude"}, indent=2)
         
         response_text = response.content[0].text
+        
+        # Debug the response object structure
+        logger.info(f"Claude response object: content length = {len(response.content) if response.content else 0}")
+        if response.content:
+            logger.info(f"First content item type: {type(response.content[0])}")
+            logger.info(f"First content text length: {len(response.content[0].text) if hasattr(response.content[0], 'text') else 'No text attribute'}")
         
         total_time = time.time() - start_time
         logger.info(f"Claude analysis completed in {total_time:.2f}s")
@@ -243,10 +256,19 @@ Ton pour l'analyse : Professionnel, précis, factuel
             return json.dumps(parsed_response, ensure_ascii=False, indent=2)
         except json.JSONDecodeError as e:
             logger.error(f"Claude returned invalid JSON: {e}")
+            logger.error(f"Response text length: {len(response_text)}")
+            logger.error(f"Response text (first 200 chars): '{response_text[:200]}'")
             logger.debug(f"Raw response (first 1000 chars): {response_text[:1000]}")
             
             # Try to extract JSON from the response if it's wrapped in text
             text = response_text.strip()
+            
+            if not text:
+                logger.error("Claude returned completely empty response")
+                return json.dumps({
+                    "status": "error", 
+                    "message": "Claude returned empty response for final analysis"
+                }, indent=2)
             
             # Look for JSON object patterns  
             start_idx = text.find('{')
@@ -265,8 +287,11 @@ Ton pour l'analyse : Professionnel, précis, factuel
                     logger.info("=== END FINAL CLAUDE OUTPUT ===")
                     
                     return json.dumps(parsed_json, ensure_ascii=False, indent=2)
-                except json.JSONDecodeError:
-                    logger.error("Could not extract valid JSON from Claude response")
+                except json.JSONDecodeError as extract_error:
+                    logger.error(f"Could not extract valid JSON from Claude response: {extract_error}")
+                    logger.error(f"Attempted to parse: '{json_part[:200]}'")
+            else:
+                logger.error("No JSON object pattern found in Claude response")
             
             # If JSON extraction fails, return the error in a structured format
             return json.dumps({

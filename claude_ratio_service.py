@@ -261,6 +261,11 @@ Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratio
 
         logger.info("Starting Claude ratio calculation...")
         
+        # Debug the API call parameters
+        logger.info(f"Making Claude API call with model: claude-sonnet-4-20250514")
+        logger.info(f"Max tokens: 4096, Temperature: 0.1")
+        logger.info(f"Prompt length: {len(prompt)} characters")
+        
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=4096,
@@ -273,6 +278,8 @@ Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratio
             ]
         )
         
+        logger.info(f"Claude API call completed. Response object type: {type(response)}")
+        
         total_time = time.time() - start_time
         logger.info(f"Claude ratio calculation completed in {total_time:.2f}s")
         
@@ -282,16 +289,28 @@ Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratio
         
         response_text = response.content[0].text if response.content else ""
         
+        # Debug the response object structure
+        logger.info(f"Claude response object: content length = {len(response.content) if response.content else 0}")
+        if response.content:
+            logger.info(f"First content item type: {type(response.content[0])}")
+            logger.info(f"First content text length: {len(response.content[0].text) if hasattr(response.content[0], 'text') else 'No text attribute'}")
+        
         # Validate JSON structure
         try:
             parsed_json = json.loads(response_text)
             logger.info("Claude returned valid JSON for ratio calculations")
         except json.JSONDecodeError as e:
             logger.error(f"Claude returned invalid JSON: {e}")
+            logger.error(f"Response text length: {len(response_text)}")
+            logger.error(f"Response text (first 200 chars): '{response_text[:200]}'")
             logger.debug(f"Raw Claude response (first 1000 chars): {response_text[:1000]}")
             
             # Try to extract JSON from the response if it's wrapped in text
             text = response_text.strip()
+            
+            if not text:
+                logger.error("Claude returned completely empty response")
+                return "Error: Claude returned empty response for ratio calculation"
             
             # Look for JSON object patterns
             start_idx = text.find('{')
@@ -303,8 +322,11 @@ Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratio
                     parsed_json = json.loads(json_part)
                     logger.info("Successfully extracted JSON from Claude response")
                     return json.dumps(parsed_json, ensure_ascii=False)
-                except json.JSONDecodeError:
-                    logger.error("Could not extract valid JSON from Claude response")
+                except json.JSONDecodeError as extract_error:
+                    logger.error(f"Could not extract valid JSON from Claude response: {extract_error}")
+                    logger.error(f"Attempted to parse: '{json_part[:200]}'")
+            else:
+                logger.error("No JSON object pattern found in Claude response")
             
             return f"Error: Claude returned malformed JSON: {str(e)}"
         
