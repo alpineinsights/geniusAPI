@@ -206,7 +206,7 @@ Instructions strictes à respecter
             response_mime_type="application/json"
         )
         
-        logger.info("Starting Gemini analysis with comprehensive ratio calculation...")
+        logger.info("Starting Gemini financial data extraction from PDF...")
         
         loop = asyncio.get_running_loop()
         generate_func = functools.partial(
