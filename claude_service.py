@@ -4,8 +4,8 @@ from clients import initialize_claude
 from logger import logger
 
 
-def query_claude(company_name: str, gemini_output: str, conversation_context=None) -> str:
-    """Call Claude API with Gemini output for final synthesis"""
+def query_claude(company_name: str, claude_ratio_output: str, annual_rent: str, conversation_context=None) -> str:
+    """Call Claude API with Claude ratio output for final financial analysis"""
     start_time = time.time()
     
     client = initialize_claude()
@@ -14,346 +14,258 @@ def query_claude(company_name: str, gemini_output: str, conversation_context=Non
 
     try:
         # Create prompt for Claude
-        prompt = f"""MISSION GLOBALE - ANALYSE FINANCIÈRE COMPLÈTE POUR ÉVALUATION LOCATAIRE
+        prompt = f"""CONTEXTE ET MISSION 
 
-Vous devez réaliser une analyse financière complète en deux étapes successives :
-1. ÉTAPE 1 : Calculer tous les ratios financiers requis (calcul interne)
-2. ÉTAPE 2 : Analyser ces ratios pour évaluer la solvabilité locative (sortie finale)
+Vous êtes un analyste financier senior spécialisé dans l'évaluation de solvabilité locative. Votre mission : Analyser la solidité financière d'une entreprise candidate à la location d'un local commercial à partir des ratios financiers et données brutes calculés par l'Agent 1. 
 
-Input : Bilan comptable (actif/passif) et compte de résultat détaillé sur les deux derniers exercices
-Output final : Ratios clés JSON + Chiffres clés JSON + Analyse financière complète de 800 mots
+Input reçu : JSON complet contenant tous les ratios financiers calculés sur les deux derniers exercices et les données brutes essentielles. 
 
-IMPORTANT: Vous DEVEZ d'abord calculer TOUS les ratios de l'étape 1 avant de procéder à l'étape 2. Aucune analyse ne peut commencer sans avoir terminé tous les calculs.
+Output attendu : Format JSON avec ratios (recopiés de l'input)) + chiffres clés (recopiés de l'input) + analyse financière complète de 800 mots. 
 
-═══════════════════════════════════════════════════════════════════════════════════
+Objectif final : Déterminer la fiabilité de l'entreprise en tant que futur locataire et formuler une recommandation argumentée en tenant compte du montant du loyer. 
 
-ÉTAPE 1 - CALCUL DES RATIOS FINANCIERS (CALCUL INTERNE)
+INPUT ATTENDU 
 
-CONTEXTE ET MISSION
-Vous êtes un analyste financier spécialisé dans le calcul de ratios comptables.
-Votre mission : Calculer tous les ratios financiers requis à partir des données financières fournies (sur les deux derniers exercices).
-IMPORTANT : AUCUNE ANALYSE N'EST DEMANDÉE. CALCULEZ UNIQUEMENT LES RATIOS.
+{{  "claude_ratio service output": {claude_ratio_output}, 
+  "company_name": "{company_name}", 
+  "loyer": "{annual_rent}" 
+}} 
+  
 
-**Input reçu pour l'entreprise {company_name} :** {gemini_output}
+FORMAT DE SORTIE OBLIGATOIRE 
 
-RATIOS À CALCULER
-IMPORTANT : Calculez UNIQUEMENT les ratios listés ci-dessous, pour les deux exercices disponibles en précisant l'année. N'ajoutez aucun ratio supplémentaire.
+Votre réponse doit être un JSON unique contenant ces trois sections : 
 
-STRUCTURE FINANCIÈRE
-Ratio | Formule
-Ressources propres | Capitaux propres + Amortissements cumulés + Emprunts et dettes auprès des établissements de crédit + Emprunts et dettes financières divers
-Ressources stables | Capitaux propres + Amortissements cumulés
-Capital d'exploitation | Total de l'actif circulant – Total du passif circulant (=avances et accomptes reçus sur commandes en cours +dettes fournisseurs et comptes rattachés + dettes fiscales et sociales + dettes sur immobilisations et comptes rattachés + autres dettes)
-Actif circulant d'exploitation | Matières premières et marchandises + Avances et acomptes versés sur commandes + Clients et comptes rattachés + Autres créances + Charges constatées d'avance
-Actif circulant hors exploitation | Capital souscrit appelé, non versé
-Dettes d'exploitation | Avances et acomptes reçus sur commandes en cours + Dettes fournisseurs et comptes rattachés + Dettes fiscales et sociales
-Dettes hors exploitation | Dettes sur immobilisations et comptes rattachés + autres dettes
-Surface financière (%) | Capitaux propres / Total du passif
-Couverture des immobilisations par les fonds propres (%) | Total brut des immobilisations / Ressources propres
-Couverture des emplois stables (%) | Ressources propres / Total brut des immobilisations
-FRNG (Fonds de roulement net global) | Capitaux propres + Emprunts et dettes auprès des établissements de crédit + Emprunts et dettes financières divers – Total brut des immobilisations
-BFR (Besoin en fonds de roulement) | Actif circulant d'exploitation + Actif circulant hors exploitation – Dettes d'exploitation - Dettes hors exploitation
-Trésorerie nette | FRNG – BFR
-Indépendance financière (%) | (Emprunts et dettes auprès des établissements de crédit + Emprunts et dettes financières divers ) / Capitaux propres
-Liquidité de l'entreprise (%) | (créances clients et comptes rattachés + disponibilités)/dettes fournisseurs et comptes rattachés
+{{ "companyName": "Nom de l'entreprise", "annualRent": "Chiffre d'affaires annuel en K€", "annee_n": "année", "annee_n_moins_1": "année", "ratios": {{ "structure_financiere": {{ "annee_n": {{ "ressources_propres": "valeur", "ressources_stables": "valeur", "capital_exploitation": "valeur", "actif_circulant_exploitation": "valeur", "actif_circulant_hors_exploitation": "valeur", "dettes_exploitation": "valeur", "dettes_hors_exploitation": "valeur", "surface_financiere_pct": "valeur", "couverture_immobilisations_fonds_propres_pct": "valeur", "couverture_emplois_stables_pct": "valeur", "frng": "valeur", "bfr": "valeur", "tresorerie_nette": "valeur", "independance_financiere_pct": "valeur", "liquidite_entreprise_pct": "valeur" }}, "annee_n_moins_1": {{ "ressources_propres": "valeur", "ressources_stables": "valeur", "capital_exploitation": "valeur", "actif_circulant_exploitation": "valeur", "actif_circulant_hors_exploitation": "valeur", "dettes_exploitation": "valeur", "dettes_hors_exploitation": "valeur", "surface_financiere_pct": "valeur", "couverture_immobilisations_fonds_propres_pct": "valeur", "couverture_emplois_stables_pct": "valeur", "frng": "valeur", "bfr": "valeur", "tresorerie_nette": "valeur", "independance_financiere_pct": "valeur", "liquidite_entreprise_pct": "valeur" }} }}, "activite_exploitation": {{ "annee_n": {{ "marge_globale": "valeur", "valeur_ajoutee": "valeur", "ebe": "valeur", "caf": "valeur", "charges_personnel_valeur_ajoutee_pct": "valeur", "impots_valeur_ajoutee_pct": "valeur", "charges_financieres_valeur_ajoutee_pct": "valeur", "taux_marge_globale_pct": "valeur", "taux_valeur_ajoutee_pct": "valeur", "taux_marge_beneficiaire_pct": "valeur", "taux_marge_brute_exploitation_pct": "valeur", "taux_obsolescence_pct": "valeur" }}, "annee_n_moins_1": {{ "marge_globale": "valeur", "valeur_ajoutee": "valeur", "ebe": "valeur", "caf": "valeur", "charges_personnel_valeur_ajoutee_pct": "valeur", "impots_valeur_ajoutee_pct": "valeur", "charges_financieres_valeur_ajoutee_pct": "valeur", "taux_marge_globale_pct": "valeur", "taux_valeur_ajoutee_pct": "valeur", "taux_marge_beneficiaire_pct": "valeur", "taux_marge_brute_exploitation_pct": "valeur", "taux_obsolescence_pct": "valeur" }} }}, "rentabilite": {{ "annee_n": {{ "rentabilite_capitaux_propres_pct": "valeur", "rentabilite_economique_pct": "valeur", "rentabilite_financiere_pct": "valeur", "rentabilite_brute_ressources_stables_pct": "valeur", "rentabilite_brute_capital_exploitation_pct": "valeur" }}, "annee_n_moins_1": {{ "rentabilite_capitaux_propres_pct": "valeur", "rentabilite_economique_pct": "valeur", "rentabilite_financiere_pct": "valeur", "rentabilite_brute_ressources_stables_pct": "valeur", "rentabilite_brute_capital_exploitation_pct": "valeur" }} }}, "evolution": {{ "taux_variation_chiffre_affaires_pct": "valeur", "taux_variation_valeur_ajoutee_pct": "valeur", "taux_variation_resultat_pct": "valeur", "taux_variation_capitaux_propres_pct": "valeur" }}, "tresorerie_financement": {{ "annee_n": {{ "capacite_generer_cash": "valeur", "capacite_remboursement_dette": "valeur", "credits_bancaires_bfr": "valeur" }}, "annee_n_moins_1": {{ "capacite_generer_cash": "valeur", "capacite_remboursement_dette": "valeur", "credits_bancaires_bfr": "valeur" }} }}, "delais_paiement": {{ "annee_n": {{ "delai_creance_clients_jours": "valeur", "delai_dettes_fournisseurs_jours": "valeur" }}, "annee_n_moins_1": {{ "delai_creance_clients_jours": "valeur", "delai_dettes_fournisseurs_jours": "valeur" }} }} }}, "chiffres_cles": {{ "chiffre_affaires_n": "valeur en K€", "chiffre_affaires_n_moins_1": "valeur en K€", "marge_globale_n": "valeur en K€", "marge_globale_n_moins_1": "valeur en K€", "taux_marge_globale_n": "valeur en %", "taux_marge_globale_n_moins_1": "valeur en %", "valeur_ajoutee_n": "valeur en K€", "valeur_ajoutee_n_moins_1": "valeur en K€", "taux_valeur_ajoutee_n": "valeur en %", "taux_valeur_ajoutee_n_moins_1": "valeur en %", "ebe_n": "valeur en K€", "ebe_n_moins_1": "valeur en K€", "resultat_exploitation_n": "valeur en K€", "resultat_exploitation_n_moins_1": "valeur en K€", "resultat_financier_n": "valeur en K€", "resultat_financier_n_moins_1": "valeur en K€", "resultat_courant_n": "valeur en K€", "resultat_courant_n_moins_1": "valeur en K€", "resultat_exercice_n": "valeur en K€", "resultat_exercice_n_moins_1": "valeur en K€", "marge_exploitation_n": "valeur en %", "marge_exploitation_n_moins_1": "valeur en %", "resultat_net_n": "valeur en K€", "resultat_net_n_moins_1": "valeur en K€", "capitaux_propres_n": "valeur en K€", "capitaux_propres_n_moins_1": "valeur en K€", "dette_financiere_n": "valeur en K€", "dette_financiere_n_moins_1": "valeur en K€" }}, "analyse_financiere": "Texte de l'analyse complète de 800 mots" }} 
 
-ACTIVITÉ D'EXPLOITATION
-Ratio | Formule
-Marge globale | Chiffre d'affaires net – Achats de marchandises – Achats de matières premières et autres approvisionnements - variation de stocks (marchandises et matières premières)
-Valeur ajoutée | Marge globale + Production stockée + Production immobilisée – Autres achats et charges externes
-EBE (excédent brut d'exploitation) | Valeur ajoutée + Subventions d'exploitation – Impôts, taxes et versements assimilés – Salaires et traitements – Charges sociales
-CAF (capacité d'auto financement) | EBE + total des produits financiers + total des produits exceptionnels – total des charges financières – total des charges exceptionnelles
-Charges de personnel / Valeur ajoutée (%) | (Salaires et traitements + Charges sociales) / Valeur ajoutée
-Impôts / Valeur ajoutée (%) | Impôts, taxes et versements assimilés / Valeur ajoutée
-Charges financières / Valeur ajoutée (%) | Charges financières / Valeur ajoutée
-Taux de marge globale (%) | Marge globale / (Ventes de marchandises + Production vendue de biens + production vendue de services)
-Taux de valeur ajoutée (%) | Valeur ajoutée / Chiffre d'affaires net
-Taux de marge bénéficiaire (%) | Résultat net comptable / Chiffre d'affaires net
-Taux de marge brute d'exploitation (%) | EBE / Chiffre d'affaires net
-Taux d'obsolescence (%) | Dotations d'exploitation / Total des actifs immobilisés (Total II)
+ 
 
-RENTABILITÉ
-Ratio | Formule
-Rentabilité des capitaux propres (%) | Résultat net comptable / Capitaux propres
-Rentabilité économique (%) | (Résultat net comptable + total des charges financières) / (Ressources propres)
-Rentabilité financière (%) | Résultat net comptable / (Ressources propres)
-Rentabilité brute des ressources stables (%) | EBE / (Ressources propres)
-Rentabilité brute du capital d'exploitation (%) | EBE / (Total de l'actif circulant – Total du passif circulant)
+ANALYSE FINANCIÈRE À PRODUIRE 
 
-ÉVOLUTION
-Ratio | Formule
-Taux de variation du chiffre d'affaires (%) | (Chiffre d'affaires net N+1 – Chiffre d'affaires net N) / Chiffre d'affaires net N
-Taux de variation de la valeur ajoutée (%) | (Valeur ajoutée N+1 – Valeur ajoutée N) / Valeur ajoutée N
-Taux de variation du résultat (%) | (Résultat net comptable N+1 – Résultat net comptable N) / Résultat net comptable N
-Taux de variation des capitaux propres (%) | (Capitaux propres N+1 – Capitaux propres N) / Capitaux propres N
+Objectif : Rédiger une analyse complète de 800 mots environ basée exclusivement sur les ratios et données reçus de l'Agent 1. 
 
-TRÉSORERIE & FINANCEMENT
-Ratio | Formule
-Capacité à générer du cash | EBE + Produits financiers + Produits exceptionnels – Charges financières– Charges exceptionnelles
-Capacité de remboursement de la dette | (Emprunts et dettes auprès des établissements de crédit + Emprunts et dettes financières divers) / Capacité à générer du cash
-Crédits bancaires courants / BFR | (Emprunts et dettes auprès des établissements de crédit + Emprunts et dettes financières divers) /BFR
+STRUCTURE OBLIGATOIRE DE L'ANALYSE 
 
-DÉLAIS DE PAIEMENT
-Ratio | Formule
-Délai créance clients (en jours) | (Clients et comptes rattachés / Chiffre d'affaires net) × 360
-Délai dettes fournisseurs (en jours) | (Dettes fournisseurs et comptes rattachés / (Achats de marchandises + Autres achats et charges externes)) × 360
+1. Évolution des indicateurs clés 
 
-Si certains éléments des formules ne sont pas exactement les mêmes, prenez les éléments dont le sens et les mots se rapprochent le plus. Evitez tout de même.
+Évolution du chiffre d'affaires (taux de variation) 
 
-CONSIGNES DE CALCUL ÉTAPE 1
-À FAIRE UNIQUEMENT
-- Extraire les données des états financiers fournis
-- Calculer tous les ratios pour les deux exercices disponibles
-- Arrondir à 1 décimale pour les pourcentages et nombres décimaux
-- Indiquer "Non calculable" si une donnée manque pour un ratio
+Évolution du résultat net (taux de variation) 
 
-EN CAS DE DONNÉES MANQUANTES
-Si un élément comptable n'apparaît pas dans les états financiers, indiquer uniquement "Donnée non disponible" et marquer le ratio comme "Non calculable".
+Évolution des capitaux propres (taux de variation) 
 
-VÉRIFICATION OBLIGATOIRE AVANT ANALYSE
-ÉTAPE CRITIQUE : Avant de commencer l'analyse de l'étape 2, vous DEVEZ :
-1. Vérifier que CHAQUE ratio de la liste ci-dessus a été calculé pour les deux exercices
-2. Pour chaque ratio manquant, indiquer explicitement "Non calculable" avec la raison
-3. Compter le nombre total de ratios calculés vs le nombre total demandé
-4. Ne JAMAIS procéder à l'analyse finale sans avoir tenté de calculer tous les ratios
+Tendance générale de l'activité 
 
-OBLIGATION : Si un ratio n'apparaît pas dans vos calculs internes, vous DEVEZ l'ajouter avec une valeur ou "Non calculable". Aucune analyse ne peut débuter sans cette vérification complète de TOUS les ratios demandés.
+2. Structure financière 
 
-═══════════════════════════════════════════════════════════════════════════════════
+Solvabilité de l'entreprise (surface financière, ressources propres) 
 
-ÉTAPE 2 - ANALYSE FINANCIÈRE POUR ÉVALUATION LOCATAIRE (SORTIE FINALE)
+Niveau d'endettement (indépendance financière) 
 
-CONTEXTE ET MISSION
-Vous êtes un analyste financier senior spécialisé dans l'évaluation de solvabilité locative.
-Votre mission : Analyser la solidité financière d'une entreprise candidate à la location d'un de nos locaux commerciaux à partir des ratios financiers déjà calculés à l'étape 1.
-Input reçu : Ratios financiers calculés sur les deux derniers exercices.
-Output attendu : Format JSON avec ratios clés + chiffres clés + analyse financière complète.
-Objectif final : Déterminer la fiabilité de l'entreprise en tant que futur locataire et formuler une recommandation argumentée.
+Équilibre financier (FRNG, BFR, trésorerie nette) 
 
-FORMAT DE SORTIE ÉTAPE 2 (SORTIE FINALE)
-Votre réponse doit être un JSON unique contenant ces trois sections :
+Couverture des immobilisations 
 
-{{
-  "ratios_cles": {{
-    "rentabilite": {{
-      "annee_n": {{
-        "rentabilite_capitaux_propres_pct": "valeur",
-        "rentabilite_economique_pct": "valeur",
-        "rentabilite_financiere_pct": "valeur",
-        "rentabilite_brute_ressources_stables_pct": "valeur",
-        "rentabilite_brute_capital_exploitation_pct": "valeur"
-      }},
-      "annee_n_moins_1": {{
-        "rentabilite_capitaux_propres_pct": "valeur",
-        "rentabilite_economique_pct": "valeur",
-        "rentabilite_financiere_pct": "valeur",
-        "rentabilite_brute_ressources_stables_pct": "valeur",
-        "rentabilite_brute_capital_exploitation_pct": "valeur"
-      }}
-    }},
-    "evolution": {{
-      "taux_variation_chiffre_affaires_pct": "valeur",
-      "taux_variation_valeur_ajoutee_pct": "valeur", 
-      "taux_variation_resultat_pct": "valeur",
-      "taux_variation_capitaux_propres_pct": "valeur"
-    }},
-    "tresorerie_financement": {{
-      "annee_n": {{
-        "capacite_generer_cash": "valeur",
-        "capacite_remboursement_dette": "valeur",
-        "credits_bancaires_bfr": "valeur"
-      }},
-      "annee_n_moins_1": {{
-        "capacite_generer_cash": "valeur", 
-        "capacite_remboursement_dette": "valeur",
-        "credits_bancaires_bfr": "valeur"
-      }}
-    }},
-    "delais_paiement": {{
-      "annee_n": {{
-        "delai_creance_clients_jours": "valeur",
-        "delai_dettes_fournisseurs_jours": "valeur"
-      }},
-      "annee_n_moins_1": {{
-        "delai_creance_clients_jours": "valeur",
-        "delai_dettes_fournisseurs_jours": "valeur"
-      }}
-    }}
-  }},
-  "chiffres_cles": {{
-    "chiffre_affaires_n": "valeur en K€",
-    "chiffre_affaires_n_moins_1": "valeur en K€",
-    "resultat_exploitation_n": "valeur en K€",
-    "resultat_exploitation_n_moins_1": "valeur en K€",
-    "marge_exploitation_n": "valeur en %",
-    "marge_exploitation_n_moins_1": "valeur en %",
-    "resultat_net_n": "valeur en K€",
-    "resultat_net_n_moins_1": "valeur en K€",
-    "capitaux_propres_n": "valeur en K€",
-    "capitaux_propres_n_moins_1": "valeur en K€",
-    "dette_financiere_n": "valeur en K€",
-    "dette_financiere_n_moins_1": "valeur en K€"
-  }},
-  "analyse_financiere": "Texte de l'analyse complète de 800 mots"
-}}
+3. Rentabilité 
 
-ANALYSE FINANCIÈRE À PRODUIRE
-Objectif : Rédiger une analyse complète de 800 mots environ basée exclusivement sur les ratios calculés à l'étape 1.
+Rentabilité économique (performance opérationnelle) 
 
-STRUCTURE OBLIGATOIRE DE L'ANALYSE
-1. Évolution des indicateurs clés
-   • Évolution du chiffre d'affaires (taux de variation)
-   • Évolution du résultat net (taux de variation)
-   • Évolution des capitaux propres (taux de variation)
-   • Tendance générale de l'activité
+Rentabilité financière (retour sur capitaux propres) 
 
-2. Structure financière
-   • Solvabilité de l'entreprise (surface financière, ressources propres)
-   • Niveau d'endettement (indépendance financière)
-   • Équilibre financier (FRNG, BFR, trésorerie nette)
-   • Couverture des immobilisations
+Rentabilité des ressources stables 
 
-3. Rentabilité
-   • Rentabilité économique (performance opérationnelle)
-   • Rentabilité financière (retour sur capitaux propres)
-   • Rentabilité des ressources stables
-   • Évolution des marges (globale, bénéficiaire, brute d'exploitation)
+Évolution des marges (globale, bénéficiaire, brute d'exploitation) 
 
-4. Capacité d'autofinancement et trésorerie
-   • Analyse de la CAF et EBE
-   • Capacité à générer du cash
-   • Capacité de remboursement
-   • Situation de trésorerie
+4. Capacité d'autofinancement et trésorerie 
 
-5. Analyse de l'exploitation
-   • Poids des charges de personnel sur la valeur ajoutée
-   • Impact des impôts et taxes sur la valeur ajoutée
-   • Charges financières sur la valeur ajoutée
-   • Efficacité opérationnelle
+Analyse de la CAF et EBE 
 
-6. Cycle d'exploitation
-   • Délais clients (créances)
-   • Délais fournisseurs (dettes)
-   • Analyse du besoin en fonds de roulement
-   • Gestion du cycle cash
+Capacité à générer du cash 
 
-7. Conclusion argumentée
-   • Synthèse des forces et faiblesses financières
-   • Évaluation du niveau de risque locatif (faible/moyen/élevé)
-   • Recommandation finale motivée (favorable/réservée/défavorable)
-   • Points de vigilance éventuels
+Capacité de remboursement 
 
-CONSIGNES MÉTHODOLOGIQUES
-À FAIRE
-- Extraire les ratios clés et chiffres clés des calculs de l'étape 1 pour compléter les JSON
-- Utiliser exclusivement les ratios calculés à l'étape 1 pour l'analyse
-- Citer des valeurs précises et des pourcentages exacts
-- Comparer l'évolution entre les deux exercices
-- Adopter un ton professionnel et factuel
-- Formuler une recommandation claire et argumentée
-- Identifier les tendances (amélioration/dégradation/stabilité)
+Situation de trésorerie 
 
-INTERDIT ABSOLU
-- Référencer dans l'analyse des données ou ratios non calculés à l'étape 1
-- Inventer ou extrapoler des données non fournies
-- Faire référence à des éléments non présents dans les ratios calculés
-- Donner des conseils opérationnels à l'entreprise
-- Formuler des hypothèses non fondées sur les ratios
+5. Analyse de l'exploitation 
 
-ÉVALUATION DU RISQUE LOCATAIRE
-Critères d'évaluation à considérer :
-- Stabilité et croissance du chiffre d'affaires
-- Solidité de la structure financière
-- Niveau d'endettement et indépendance financière
-- Capacité de génération de trésorerie
-- Évolution de la rentabilité
-- Gestion du BFR et des délais de paiement
+Poids des charges de personnel sur la valeur ajoutée 
 
-Niveaux de risque :
-- Risque faible : Situation financière saine, recommandation favorable
-- Risque moyen : Situation mitigée, recommandation avec réserves ou conditions
-- Risque élevé : Situation préoccupante, recommandation défavorable
+Impact des impôts et taxes sur la valeur ajoutée 
 
-CLAUSE DE LIMITATION
-Si un ratio n'est pas calculable ou manquant, l'indiquer clairement dans l'analyse. Pour les chiffres clés manquants, utiliser "Non disponible" dans le JSON. Préciser que l'évaluation est basée uniquement sur les ratios financiers disponibles et constitue un avis indicatif qui doit être complété par d'autres éléments d'appréciation (secteur d'activité, historique de paiement, garanties, etc.).
+Charges financières sur la valeur ajoutée 
 
-═══════════════════════════════════════════════════════════════════════════════════
+Efficacité opérationnelle 
 
-INSTRUCTIONS FINALES
-1. Calculez d'abord TOUS les ratios requis à l'étape 1 (calcul interne) - AUCUNE EXCEPTION
-2. Vérifiez que CHAQUE ratio de chaque catégorie est calculé avant de procéder à l'analyse
-3. Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratios) + Rentabilité (5 ratios) + Évolution (4 ratios) + Trésorerie & Financement (3 ratios) + Délais de Paiement (2 ratios) = 41 ratios MINIMUM
-4. Si un ratio ne peut être calculé, l'indiquer explicitement comme "Non calculable" avec la raison
-5. Utilisez ces ratios et uniquement ces ratios pour produire l'analyse finale de l'étape 2
-6. Retournez UNIQUEMENT le JSON structuré avec les trois sections : ratios_cles, chiffres_cles, analyse_financiere
+6. Cycle d'exploitation 
 
-CONTRÔLE QUALITÉ : Votre analyse doit référencer des ratios concrets. Si vous mentionnez un ratio dans l'analyse, il DOIT avoir été calculé à l'étape 1.
+Délais clients (créances) 
 
-IMPORTANT : Votre réponse doit être un JSON valide et complet. Ne pas ajouter de texte avant ou après le JSON.
+Délais fournisseurs (dettes) 
 
-Ton pour l'analyse : Professionnel, précis, factuel
-Format de l'analyse : Texte de 800 mots avec phrases courtes, données chiffrées, pourcentages précis
-Conclusion : Recommandation claire avec niveau de risque explicite
+Analyse du besoin en fonds de roulement 
 
-Conclusion type à adapter dans l'analyse :
-"Au regard de l'analyse des ratios financiers, l'entreprise présente un profil de risque [FAIBLE/MOYEN/ÉLEVÉ] en tant que locataire potentiel. [Synthèse en 2-3 phrases des points clés]. Cette évaluation, basée sur les seuls états financiers, devra être complétée par l'analyse d'autres critères (secteur, historique, garanties) pour une décision définitive."
-"""
+Gestion du cycle cash 
 
-        logger.info("Starting Claude synthesis...")
+7. Conclusion argumentée 
+
+Synthèse des forces et faiblesses financières 
+
+Évaluation du niveau de risque locatif (faible/moyen/élevé) 
+
+Recommandation finale motivée (favorable/réservée/défavorable) 
+
+Points de vigilance éventuels 
+
+CONSIGNES MÉTHODOLOGIQUES 
+
+À FAIRE 
+
+Recopier exactement tous les ratios calculés reçus de l'Agent 1 dans la section "ratios" 
+
+Extraire les données brutes reçues pour compléter le JSON 
+
+Utiliser exclusivement les ratios et données fournis par l'Agent 1 pour l'analyse 
+
+Intégrer le montant du loyer dans l'analyse de solvabilité locative 
+
+Calculer le ratio loyer/chiffre d'affaires et loyer/EBE pour évaluer la capacité de paiement 
+
+Citer des valeurs précises et des pourcentages exacts 
+
+Comparer l'évolution entre les deux exercices 
+
+Adopter un ton professionnel et factuel 
+
+Formuler une recommandation claire et argumentée 
+
+Identifier les tendances (amélioration/dégradation/stabilité) 
+
+INTERDIT ABSOLU 
+
+Référencer dans l'analyse des données ou ratios non fournis par l'Agent 1 
+
+Inventer ou extrapoler des données non fournies 
+
+Faire référence à des éléments non présents dans les ratios reçus 
+
+Donner des conseils opérationnels à l'entreprise 
+
+Formuler des hypothèses non fondées sur les ratios 
+
+ÉVALUATION DU RISQUE LOCATAIRE 
+
+Critères d'évaluation à considérer : 
+
+Stabilité et croissance du chiffre d'affaires 
+
+Solidité de la structure financière 
+
+Niveau d'endettement et indépendance financière 
+
+Capacité de génération de trésorerie 
+
+Évolution de la rentabilité 
+
+Gestion du BFR et des délais de paiement 
+
+Capacité de paiement du loyer (ratio loyer/CA, loyer/EBE, loyer/résultat net) 
+
+Niveaux de risque : 
+
+Risque faible : Situation financière saine, recommandation favorable 
+
+Risque moyen : Situation mitigée, recommandation avec réserves ou conditions 
+
+Risque élevé : Situation préoccupante, recommandation défavorable 
+
+CLAUSE DE LIMITATION 
+
+Si un ratio n'est pas calculable ou manquant dans les données reçues, l'indiquer clairement dans l'analyse. Pour les chiffres clés manquants, utiliser "Non disponible" dans le JSON. Préciser que l'évaluation est basée uniquement sur les ratios financiers disponibles et constitue un avis indicatif qui doit être complété par d'autres éléments d'appréciation (secteur d'activité, historique de paiement, garanties, etc.). 
+
+CONCLUSION TYPE À ADAPTER 
+
+"Au regard de l'analyse des ratios financiers, l'entreprise présente un profil de risque [FAIBLE/MOYEN/ÉLEVÉ] en tant que locataire potentiel. [Synthèse en 2-3 phrases des points clés]. Cette évaluation, basée sur les seuls états financiers, devra être complétée par l'analyse d'autres critères (secteur, historique, garanties) pour une décision définitive." 
+
+INSTRUCTIONS FINALES 
+
+Utilisez UNIQUEMENT les ratios et données fournis par l'Agent 1 
+
+Recopiez exactement tous les ratios calculés dans la section "ratios" du JSON de sortie 
+
+Intégrez le montant du loyer dans votre analyse de solvabilité 
+
+Retournez UNIQUEMENT le JSON structuré avec les trois sections : ratios, chiffres_cles (recopie des données brutes), analyse_financiere 
+
+Contrôle qualité : Votre analyse doit référencer des ratios concrets présents dans les données reçues 
+
+Votre réponse doit être un JSON valide et complet 
+
+Ne pas ajouter de texte avant ou après le JSON 
+
+Ton pour l'analyse : Professionnel, précis, factuel 
+
+ Format de l'analyse : Texte de 800 mots avec phrases courtes, données chiffrées, pourcentages précis 
+
+ Conclusion : Recommandation claire avec niveau de risque explicite"""
+
+        logger.info(f"Calling Claude for final financial analysis for {company_name}")
+
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=4096,
+            temperature=0.2,
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }]
+        )
+
+        if not response or not response.content:
+            logger.error("Claude returned empty response")
+            return json.dumps({"status": "error", "message": "Empty response from Claude"}, indent=2)
         
+        response_text = response.content[0].text
+        
+        total_time = time.time() - start_time
+        logger.info(f"Claude analysis completed in {total_time:.2f}s")
+        
+        # Try to parse and validate the JSON response
         try:
-            message = client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=8192,
-                temperature=0.2,
-                system="Vous êtes un analyste financier senior spécialisé dans l'évaluation de solvabilité locative.",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
+            parsed_response = json.loads(response_text)
+            logger.info("Claude returned valid JSON for financial analysis")
+            return json.dumps(parsed_response, ensure_ascii=False, indent=2)
+        except json.JSONDecodeError as e:
+            logger.error(f"Claude returned invalid JSON: {e}")
+            logger.error(f"Raw response (first 1000 chars): {response_text[:1000]}")
             
-            total_time = time.time() - start_time
-            logger.info(f"Claude completed in {total_time:.2f}s")
+            # Try to extract JSON from the response if it's wrapped in text
+            text = response_text.strip()
             
-            # Extract response text with better error handling
-            if not message or not message.content or len(message.content) == 0:
-                logger.error("Claude returned empty message or content")
-                return json.dumps({"status": "error", "message": "Claude returned empty response"}, indent=2)
+            # Look for JSON object patterns  
+            start_idx = text.find('{')
+            end_idx = text.rfind('}')
             
-            response_text = message.content[0].text
-            
-            if not response_text or response_text.strip() == "":
-                logger.error("Claude returned empty text content")
-                return json.dumps({"status": "error", "message": "Claude returned empty text content"}, indent=2)
-            
-            logger.info(f"Claude response length: {len(response_text)} characters")
-            
-            # Try to parse as JSON if it looks like JSON
-            response_text_stripped = response_text.strip()
-            
-            if response_text_stripped.startswith('{') and response_text_stripped.endswith('}'):
+            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
                 try:
-                    parsed_response = json.loads(response_text_stripped)
-                    logger.info("Claude returned valid JSON response")
-                    # Convert back to JSON string for consistent handling
-                    response_text = json.dumps(parsed_response, indent=2, ensure_ascii=False)
-                except json.JSONDecodeError as e:
-                    logger.warning(f"Claude response looks like JSON but failed to parse: {e}")
-                    logger.warning(f"First 200 chars of response: {response_text_stripped[:200]}")
-                    # Keep the original response text
-            else:
-                logger.info("Claude response is not JSON format, treating as plain text")
-                # Log a sample of the response for debugging
-                logger.debug(f"Claude response sample (first 500 chars): {response_text_stripped[:500]}")
+                    json_part = text[start_idx:end_idx + 1]
+                    parsed_json = json.loads(json_part)
+                    logger.info("Successfully extracted JSON from Claude response")
+                    return json.dumps(parsed_json, ensure_ascii=False, indent=2)
+                except json.JSONDecodeError:
+                    logger.error("Could not extract valid JSON from Claude response")
             
-            return response_text
-            
-        except Exception as api_error:
-            logger.error(f"Claude API call failed: {str(api_error)}", exc_info=True)
-            total_time = time.time() - start_time
-            logger.info(f"Claude failed after {total_time:.2f}s")
-            return json.dumps({"status": "error", "message": f"Claude API error: {str(api_error)}"}, indent=2)
-        
+            # If JSON extraction fails, return the error in a structured format
+            return json.dumps({
+                "status": "error", 
+                "message": f"Claude returned malformed JSON: {str(e)}",
+                "raw_response": response_text[:500]
+            }, indent=2)
+
     except Exception as e:
-        logger.error(f"Claude API error: {str(e)}")
-        return json.dumps({"status": "error", "message": f"Error calling Claude API: {str(e)}"}, indent=2) 
+        logger.error(f"Claude analysis failed: {str(e)}", exc_info=True)
+        total_time = time.time() - start_time
+        return json.dumps({
+            "status": "error",
+            "message": f"Error during Claude analysis: {str(e)}",
+            "execution_time": f"{total_time:.2f}s"
+        }, indent=2) 

@@ -25,86 +25,175 @@ async def query_gemini_with_pdf(client: genai.Client, pdf_content: bytes, compan
                         mime_type="application/pdf",
                         data=pdf_content
                     ),
-                    types.Part.from_text(text="""Tu es un agent d'extraction de données financières. Le document fourni contient un bilan, un compte de résultat, et éventuellement des annexes d'une entreprise.
+                    types.Part.from_text(text="""Tu es un agent d'extraction de données financières. Le document fourni contient un bilan, un compte de résultat, et éventuellement des annexes d'une entreprise. 
 
-Objectif
-Pour chaque intitulé standardisé ci-dessous, tu dois :
-•	Identifier la valeur correspondante dans le document, même si le libellé diffère
-•	Extraire cette valeur brute, dans l'unité du document (ex. : euros, milliers d'euros, etc.)
-•	Fournir cette valeur pour les deux derniers exercices disponibles dans le document (ex : N et N-1)
-•	Utiliser exclusivement les intitulés fournis ci-dessous, même si le libellé dans le document est différent
-
-Format de sortie JSON
-[
-  { "intitulé": "Capitaux propres", "année": 2023, "valeur": 420000 },
-  { "intitulé": "Capitaux propres", "année": 2022, "valeur": 415000 },
-  ...
-]
  
-Chaque intitulé doit apparaître deux fois dans la liste JSON : une fois pour l'exercice N, une fois pour N-1.
 
-Liste unique des intitulés à rechercher
-Bilan – Actif:
-•	Total de l'actif circulant
-•	Total des actifs immobilisés (total II)
-•	Total de l'actif
-•	Matières premières et marchandises
-•	Avances et acomptes versés sur commandes
-•	Créances à clients et comptes rattachés
-•	Autres créances
-•	Charges constatées d'avance
-•	Capital souscrit appelé, non versé
-•	Disponibilités
+Objectif 
 
-Bilan – Passif:
-•	Total du passif
-•	Total dettes
-•	Capitaux propres
-•	Amortissements cumulés
-•	Emprunts et dettes auprès des établissements de crédit
-•	Emprunts et dettes financières divers
-•	Avances et acomptes reçus sur commandes en cours
-•	Dettes fournisseurs et comptes rattachés
-•	Dettes fiscales et sociales
-•	Autres dettes
-•	Dettes sur immobilisations et comptes rattachés
-•	Concours bancaires courants
+Pour chaque intitulé standardisé ci-dessous, tu dois : 
 
-Compte de résultat – Produits:
-•	Chiffre d'affaires net
-•	Production vendue de biens
-•	Production vendue de services
-•	Production stockée
-•	Production immobilisée
-•	Produits financiers
-•	Produits exceptionnels
-•	Subventions d'exploitation
+Identifier la valeur correspondante dans le document, même si le libellé diffère 
 
-Compte de résultat – Charges:
-•	Achats de marchandises 
-•	Achats de matières premières et autres approvisionnements
-•	Variation de stock (marchandises)
-•	Variation de stocks (matières premières)
-•	Autres achats et charges externes
-•	Salaires et traitements
-•	Charges sociales
-•	Impôts, taxes et versements assimilés
-•	Intérêts et charges assimilées
-•	Charges financières
-•	Charges exceptionnelles
-•	Dotations d'exploitation
+Extraire cette valeur brute, dans l'unité du document (ex. : euros, milliers d'euros, etc.) 
 
-Résultat:
-•	Résultat net comptable
+Fournir cette valeur pour les deux derniers exercices disponibles dans le document (ex : N et N-1) 
 
-Instructions strictes à respecter
-•	Ne jamais modifier les intitulés fournis
-•	Ne pas interpréter ou compléter une donnée absente
-•	Ne pas faire d'analyse ou de commentaire
-•	Ne pas changer ou convertir les unités du document
-•	Si une donnée est absente pour une des deux années, ne pas l'inventer
-•	Si une valeur est zéro dans le document, utiliser 0 et non null
-•	Utiliser null uniquement pour les données véritablement absentes du document""")
+Utiliser exclusivement les intitulés fournis ci-dessous, même si le libellé dans le document est différent 
+
+ 
+
+Format de sortie JSON 
+
+[ 
+
+  { "intitulé": "Capitaux propres", "année": 2023, "valeur": 420000 }, 
+
+  { "intitulé": "Capitaux propres", "année": 2022, "valeur": 415000 }, 
+
+  ... 
+
+] 
+
+  
+
+Chaque intitulé doit apparaître deux fois dans la liste JSON : une fois pour l'exercice N, une fois pour N-1. 
+
+ 
+
+Liste unique des intitulés à rechercher 
+
+Bilan – Actif: 
+
+Total de l'actif circulant 
+
+Total des actifs immobilisés (total II) 
+
+Total de l'actif 
+
+Matières premières et marchandises 
+
+Avances et acomptes versés sur commandes 
+
+Créances à clients et comptes rattachés 
+
+Autres créances 
+
+Charges constatées d'avance 
+
+Capital souscrit appelé, non versé 
+
+Disponibilités 
+
+Amortissements cumulés (SEULEMENT année n. Pas n moins 1) 
+
+ 
+
+Bilan – Passif: 
+
+Total du passif 
+
+Total dettes 
+
+Capitaux propres 
+
+Emprunts et dettes auprès des établissements de crédit 
+
+Emprunts et dettes financières divers 
+
+Avances et acomptes reçus sur commandes en cours 
+
+Dettes fournisseurs et comptes rattachés 
+
+Dettes fiscales et sociales 
+
+Autres dettes 
+
+Dettes sur immobilisations et comptes rattachés 
+
+Concours bancaires courants 
+
+ 
+
+Compte de résultat – Produits: 
+
+Chiffre d'affaires net 
+
+Production vendue de biens 
+
+Production vendue de services 
+
+Production stockée 
+
+Production immobilisée 
+
+Produits financiers 
+
+Produits exceptionnels 
+
+Subventions d'exploitation 
+
+ 
+
+Compte de résultat – Charges: 
+
+Achats de marchandises  
+
+Achats de matières premières et autres approvisionnements 
+
+Variation de stock (marchandises) 
+
+Variation de stocks (matières premières) 
+
+Autres achats et charges externes 
+
+Salaires et traitements 
+
+Charges sociales 
+
+Impôts, taxes et versements assimilés 
+
+Intérêts et charges assimilées 
+
+Charges financières 
+
+Charges exceptionnelles 
+
+Dotations d'exploitation 
+
+ 
+
+Résultat: 
+
+Résultat net comptable 
+
+Résultat d'exploitation 
+
+Résultat financier 
+
+Résultat courant 
+
+ 
+
+A réécrire comme tel dans le json de sortie : 
+
+Loyer (annual rent dans le payload reçu) 
+
+Nom de la société (companyName dans le payload reçu) 
+
+ 
+
+Instructions strictes à respecter 
+
+•     Ne jamais modifier les intitulés fournis 
+
+•     Ne pas interpréter ou compléter une donnée absente 
+
+•     Ne pas faire d'analyse ou de commentaire 
+
+•     Ne pas changer ou convertir les unités du document 
+
+•     Si une donnée est absente pour une des deux années, ne pas l'inventer""")
                 ]
             )
         ]
