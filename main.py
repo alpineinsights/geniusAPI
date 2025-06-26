@@ -49,7 +49,6 @@ async def get_financial_insights(request: QueryRequest):
     
     try:
         # Call the consolidated run_analysis function from app.py
-        # Note: run_analysis now handles uploaded PDF analysis instead of document processing
         analysis_result = await run_analysis(
             company_name=request.companyName,
             pdf_url=request.pdfUrl,
@@ -63,8 +62,6 @@ async def get_financial_insights(request: QueryRequest):
         # Add processing time to the analysis result
         if isinstance(analysis_result, dict):
             analysis_result["processing_time"] = processing_time
-            # Log the final JSON output being returned
-            logger.info(f"FINAL JSON OUTPUT: {json.dumps(analysis_result, indent=2)}")
             return analysis_result
         else:
             # Fallback for any edge cases where run_analysis still returns a string
@@ -72,7 +69,6 @@ async def get_financial_insights(request: QueryRequest):
                 "answer": analysis_result, 
                 "processing_time": processing_time
             }
-            logger.info(f"FINAL JSON OUTPUT (Fallback): {json.dumps(response_data, indent=2)}")
             return response_data
     
     except Exception as e:

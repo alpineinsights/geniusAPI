@@ -89,33 +89,28 @@ async def run_analysis(company_name: str, pdf_url: str, annual_rent: str):
                     "details": final_analysis
                 }
             
-            # Strip markdown fences if present
-            if final_analysis.strip().startswith("```json"):
-                final_analysis = final_analysis.strip()[7:-3].strip()
-            elif final_analysis.strip().startswith("```"):
-                final_analysis = final_analysis.strip()[3:-3].strip()
-            else:
-                final_analysis = final_analysis.strip()
+            # Clean JSON response - remove any markdown wrappers
+            cleaned_response = final_analysis.strip()
+            if cleaned_response.startswith("```json"):
+                cleaned_response = cleaned_response[7:]
+            if cleaned_response.startswith("```"):
+                cleaned_response = cleaned_response[3:]
+            if cleaned_response.endswith("```"):
+                cleaned_response = cleaned_response[:-3]
+            cleaned_response = cleaned_response.strip()
 
-            # Validate final response as JSON
+            # Validate and parse JSON
             try:
-                json.loads(final_analysis)
+                result = json.loads(cleaned_response)
                 logger.info("Claude returned valid JSON response for final analysis")
+                return result
             except json.JSONDecodeError as validate_err:
                 logger.error(f"Claude returned invalid JSON: {validate_err}")
-                logger.error(f"Claude response sample: {final_analysis[:500]}")
+                logger.error(f"Claude response sample: {cleaned_response[:500]}")
                 return {
                     "status": "error",
                     "message": f"Claude returned invalid JSON: {validate_err}"
                 }
-            
-            # Return ONLY the final Claude analysis (as per requirement)
-            logger.info("=== FINAL OUTPUT ===")
-            logger.info(final_analysis)
-            logger.info("=== END FINAL OUTPUT ===")
-            
-            # Parse and return the final analysis JSON directly
-            return json.loads(final_analysis)
             
         except Exception as e_analysis:
             logger.error(f"Claude final analysis error: {e_analysis}")
