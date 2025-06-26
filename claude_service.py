@@ -233,6 +233,13 @@ Ton pour l'analyse : Professionnel, précis, factuel
         try:
             parsed_response = json.loads(response_text)
             logger.info("Claude returned valid JSON for financial analysis")
+            
+            # Extensively log the final JSON output that will be sent to webhook
+            formatted_output = json.dumps(parsed_response, ensure_ascii=False, indent=2)
+            logger.info("=== FINAL CLAUDE OUTPUT (JSON FORMAT) ===")
+            logger.info(f"Full JSON response being sent to webhook:\n{formatted_output}")
+            logger.info("=== END FINAL CLAUDE OUTPUT ===")
+            
             return json.dumps(parsed_response, ensure_ascii=False, indent=2)
         except json.JSONDecodeError as e:
             logger.error(f"Claude returned invalid JSON: {e}")
@@ -250,6 +257,13 @@ Ton pour l'analyse : Professionnel, précis, factuel
                     json_part = text[start_idx:end_idx + 1]
                     parsed_json = json.loads(json_part)
                     logger.info("Successfully extracted JSON from Claude response")
+                    
+                    # Extensively log the extracted final JSON output
+                    formatted_output = json.dumps(parsed_json, ensure_ascii=False, indent=2)
+                    logger.info("=== FINAL CLAUDE OUTPUT (EXTRACTED JSON FORMAT) ===")
+                    logger.info(f"Full JSON response being sent to webhook:\n{formatted_output}")
+                    logger.info("=== END FINAL CLAUDE OUTPUT ===")
+                    
                     return json.dumps(parsed_json, ensure_ascii=False, indent=2)
                 except json.JSONDecodeError:
                     logger.error("Could not extract valid JSON from Claude response")

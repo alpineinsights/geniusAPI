@@ -103,6 +103,13 @@ async def run_analysis(company_name: str, pdf_url: str, annual_rent: str):
             try:
                 result = json.loads(cleaned_response)
                 logger.info("Analysis completed successfully")
+                
+                # Extensively log the final result being returned to webhook
+                formatted_result = json.dumps(result, ensure_ascii=False, indent=2)
+                logger.info("=== FINAL ANALYSIS RESULT (WEBHOOK OUTPUT) ===")
+                logger.info(f"Complete analysis result being returned:\n{formatted_result}")
+                logger.info("=== END FINAL ANALYSIS RESULT ===")
+                
                 return result
             except json.JSONDecodeError as validate_err:
                 logger.error(f"Claude returned invalid JSON: {validate_err}")
