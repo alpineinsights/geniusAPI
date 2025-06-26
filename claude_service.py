@@ -218,7 +218,7 @@ IMPORTANT : Commencez votre réponse directement par {{ et terminez par }}. Aucu
 
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=4096,
+            max_tokens=8192,
             temperature=0.2,
             messages=[{
                 "role": "user",
