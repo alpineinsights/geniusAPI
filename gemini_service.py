@@ -87,7 +87,7 @@ Disponibilités
 
 Amortissements cumulés (SEULEMENT année n. Pas n moins 1) 
 
- 
+
 
 Bilan – Passif: 
 
@@ -113,7 +113,7 @@ Dettes sur immobilisations et comptes rattachés
 
 Concours bancaires courants 
 
- 
+
 
 Compte de résultat – Produits: 
 
@@ -133,7 +133,7 @@ Produits exceptionnels
 
 Subventions d'exploitation 
 
- 
+
 
 Compte de résultat – Charges: 
 

@@ -260,7 +260,7 @@ Ton pour l'analyse : Professionnel, précis, factuel
                 "message": f"Claude returned malformed JSON: {str(e)}",
                 "raw_response": response_text[:500]
             }, indent=2)
-
+        
     except Exception as e:
         logger.error(f"Claude analysis failed: {str(e)}", exc_info=True)
         total_time = time.time() - start_time
