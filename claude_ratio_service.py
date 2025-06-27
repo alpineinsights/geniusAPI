@@ -259,14 +259,52 @@ Si un ratio n'apparaît pas dans vos calculs, vous DEVEZ l'ajouter avec une vale
 
 Comptez : Structure Financière (15 ratios) + Activité d'Exploitation (12 ratios) + Rentabilité (5 ratios) + Évolution (4 ratios) + Trésorerie & Financement (3 ratios) + Délais de Paiement (2 ratios) = 41 ratios MINIMUM
 
+DONNÉES BRUTES À EXTRAIRE (sans calcul)
+
+En plus des ratios calculés, vous devez extraire les données financières brutes suivantes pour les deux exercices :
+
+Chiffre d'affaires
+Résultat d'exploitation  
+Résultat financier
+Résultat net
+Résultat courant
+Capitaux propres
+Total dettes
+
+FORMAT DE SORTIE JSON REQUIS
+
+Votre JSON doit contenir deux sections :
+1. "ratios_calcules": {{{{ tous les ratios calculés organisés par catégories }}}}
+2. "donnees_brutes": {{{{ 
+   "annee_n": {{{{
+     "chiffre_affaires": "valeur",
+     "resultat_exploitation": "valeur", 
+     "resultat_financier": "valeur",
+     "resultat_net": "valeur",
+     "resultat_courant": "valeur",
+     "capitaux_propres": "valeur",
+     "total_dettes": "valeur"
+   }}}},
+   "annee_n_moins_1": {{{{
+     "chiffre_affaires": "valeur",
+     "resultat_exploitation": "valeur",
+     "resultat_financier": "valeur", 
+     "resultat_net": "valeur",
+     "resultat_courant": "valeur",
+     "capitaux_propres": "valeur",
+     "total_dettes": "valeur"
+   }}}}
+}}}}
+
 INSTRUCTIONS CRITIQUES POUR LE FORMAT DE SORTIE
 
 1. Votre réponse DOIT être un JSON valide UNIQUEMENT
 2. Aucun texte avant ou après le JSON
 3. Aucun markdown, aucune explication, SEULEMENT le JSON
-4. Commencez votre réponse directement par {{ et terminez par }}
+4. Commencez votre réponse directement par {{{{ et terminez par }}}}
+5. Incluez OBLIGATOIREMENT les deux sections : ratios_calcules ET donnees_brutes
 
-RÈGLE ABSOLUE : Retournez UNIQUEMENT le JSON des ratios calculés, rien d'autre"""
+RÈGLE ABSOLUE : Retournez UNIQUEMENT le JSON complet avec ratios calculés ET données brutes extraites, rien d'autre"""
 
         logger.info("Starting Claude ratio calculation...")
         
