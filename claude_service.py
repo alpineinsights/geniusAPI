@@ -48,7 +48,7 @@ ANALYSE FINANCIÈRE À PRODUIRE
 
 Objectif : Rédiger une analyse complète de 800 mots environ basée exclusivement sur les ratios et données reçus de l'Agent 1.
 
-STRUCTURE OBLIGATOIRE DE L'ANALYSE
+STRUCTURE OBLIGATOIRE DE L'ANALYSE (faire des paragraphes distincts en sautant des lignes avec le nom de chaque partie en gras)
 
 1. Évolution des indicateurs clés
 
